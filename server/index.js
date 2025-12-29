@@ -16,8 +16,12 @@ const playbackRoutes = require('./routes/playback');
 const roomRoutes = require('./routes/rooms');
 const aiRoutes = require('./routes/ai');
 
-// Import AI service for initialization
+// Import services for initialization
 const colabAIService = require('./services/colabAIService');
+const dataCollectionService = require('./services/dataCollectionService');
+const realTimeAnalytics = require('./services/realTimeAnalytics');
+const holyShitFeatures = require('./services/holyShitFeatures');
+const googleCloud = require('./config/googleCloud');
 
 const app = express();
 const server = http.createServer(app);
@@ -74,22 +78,62 @@ const PORT = process.env.PORT || 5000;
 // Initialize connections and start server
 const startServer = async () => {
   try {
+    console.log('Starting Hathor Music Platform...');
+    
     // Connect to Redis
     await connectRedis();
-    console.log('Connected to Redis');
+    console.log('✓ Connected to Redis');
+
+    // Initialize Google Cloud services
+    const googleCloudInitialized = await googleCloud.initialize();
+    if (googleCloudInitialized) {
+      console.log('✓ Google Cloud services initialized');
+    } else {
+      console.log('○ Google Cloud services not configured (optional)');
+    }
+
+    // Initialize Data Collection Service
+    const dataCollectionInitialized = await dataCollectionService.initialize();
+    if (dataCollectionInitialized) {
+      console.log('✓ Data Collection Service initialized');
+    } else {
+      console.log('⚠ Data Collection Service failed to initialize');
+    }
+
+    // Initialize Real-Time Analytics
+    const analyticsInitialized = await realTimeAnalytics.initialize();
+    if (analyticsInitialized) {
+      console.log('✓ Real-Time Analytics initialized');
+    } else {
+      console.log('⚠ Real-Time Analytics failed to initialize');
+    }
 
     // Initialize Colab AI Service
     const aiInitialized = await colabAIService.initialize();
     if (aiInitialized) {
-      console.log('Colab AI Service initialized');
+      console.log('✓ Colab AI Service initialized');
     } else {
-      console.log('Colab AI Service running in fallback mode (not configured)');
+      console.log('○ Colab AI Service running in fallback mode (not configured)');
+    }
+
+    // Initialize Holy Shit Features
+    const holyShitInitialized = await holyShitFeatures.initialize();
+    if (holyShitInitialized) {
+      console.log('✓ Holy Shit Features initialized');
+    } else {
+      console.log('⚠ Holy Shit Features failed to initialize');
     }
 
     // Start server
     server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+      console.log('\n' + '='.repeat(60));
+      console.log(`🎵 Hathor Music Platform Server Running`);
+      console.log('='.repeat(60));
+      console.log(`Port: ${PORT}`);
       console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`API: http://localhost:${PORT}/api`);
+      console.log(`Health: http://localhost:${PORT}/api/health`);
+      console.log('='.repeat(60) + '\n');
     });
   } catch (error) {
     console.error('Failed to start server:', error);
@@ -100,8 +144,26 @@ const startServer = async () => {
 startServer();
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
+process.on('SIGTERM', async () => {
   console.log('SIGTERM signal received: closing HTTP server');
+  
+  // Cleanup services
+  await dataCollectionService.cleanup();
+  await realTimeAnalytics.cleanup();
+  
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', async () => {
+  console.log('\nSIGINT signal received: closing HTTP server');
+  
+  // Cleanup services
+  await dataCollectionService.cleanup();
+  await realTimeAnalytics.cleanup();
+  
   server.close(() => {
     console.log('HTTP server closed');
     process.exit(0);
