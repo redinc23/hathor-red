@@ -1,4 +1,5 @@
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import { v4 as uuidv4 } from 'uuid';
 import { initializeSyncEngine, enqueueSyncJob, getSyncStateRecord } from './engine';
 import { verifyLinearSignature, verifyNotionSignature } from './clients';
@@ -6,28 +7,12 @@ import { SyncJobPayload, SyncSystem } from './types';
 
 const router = express.Router();
 type RawBodyRequest = express.Request & { rawBody?: string };
-const WEBHOOK_WINDOW_MS = 60_000;
-const WEBHOOK_MAX_REQUESTS = Number(process.env.WEBHOOK_RATE_LIMIT || 60);
-const webhookHits = new Map<string, { count: number; reset: number }>();
-
-const webhookRateLimit: express.RequestHandler = (req, res, next) => {
-  const key = req.ip || 'global';
-  const now = Date.now();
-  const entry = webhookHits.get(key);
-
-  if (!entry || entry.reset <= now) {
-    webhookHits.set(key, { count: 1, reset: now + WEBHOOK_WINDOW_MS });
-    return next();
-  }
-
-  if (entry.count >= WEBHOOK_MAX_REQUESTS) {
-    return res.status(429).json({ error: 'Too many webhook requests' });
-  }
-
-  entry.count += 1;
-  webhookHits.set(key, entry);
-  next();
-};
+const webhookRateLimit = rateLimit({
+  windowMs: 60_000,
+  max: Number(process.env.WEBHOOK_RATE_LIMIT || 60),
+  standardHeaders: true,
+  legacyHeaders: false
+});
 
 router.use('/webhook', webhookRateLimit);
 
