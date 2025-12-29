@@ -1,0 +1,104 @@
+-- Database Schema for Hathor Music Platform
+
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    display_name VARCHAR(100),
+    avatar_url VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Songs Table
+CREATE TABLE IF NOT EXISTS songs (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    artist VARCHAR(255) NOT NULL,
+    album VARCHAR(255),
+    duration INTEGER NOT NULL,
+    file_path VARCHAR(255) NOT NULL,
+    cover_url VARCHAR(255),
+    genre VARCHAR(50),
+    year INTEGER,
+    uploaded_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Playlists Table
+CREATE TABLE IF NOT EXISTS playlists (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    is_ai_generated BOOLEAN DEFAULT FALSE,
+    prompt TEXT,
+    is_public BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Playlist Songs (Many-to-Many)
+CREATE TABLE IF NOT EXISTS playlist_songs (
+    id SERIAL PRIMARY KEY,
+    playlist_id INTEGER REFERENCES playlists(id) ON DELETE CASCADE,
+    song_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
+    position INTEGER NOT NULL,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(playlist_id, song_id)
+);
+
+-- Listening Rooms Table
+CREATE TABLE IF NOT EXISTS listening_rooms (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    host_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    current_song_id INTEGER REFERENCES songs(id) ON DELETE SET NULL,
+    current_position INTEGER DEFAULT 0,
+    is_playing BOOLEAN DEFAULT FALSE,
+    is_public BOOLEAN DEFAULT TRUE,
+    max_listeners INTEGER DEFAULT 50,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Room Participants
+CREATE TABLE IF NOT EXISTS room_participants (
+    id SERIAL PRIMARY KEY,
+    room_id INTEGER REFERENCES listening_rooms(id) ON DELETE CASCADE,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    joined_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(room_id, user_id)
+);
+
+-- User Playback State (for cross-device sync)
+CREATE TABLE IF NOT EXISTS playback_states (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    current_song_id INTEGER REFERENCES songs(id) ON DELETE SET NULL,
+    position INTEGER DEFAULT 0,
+    is_playing BOOLEAN DEFAULT FALSE,
+    volume REAL DEFAULT 1.0,
+    playback_speed REAL DEFAULT 1.0,
+    pitch_shift REAL DEFAULT 0.0,
+    stems_config JSONB DEFAULT '{"vocals": true, "drums": true, "bass": true, "other": true}'::jsonb,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- User Listening History
+CREATE TABLE IF NOT EXISTS listening_history (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    song_id INTEGER REFERENCES songs(id) ON DELETE CASCADE,
+    listened_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    duration_played INTEGER
+);
+
+-- Indexes for performance
+CREATE INDEX IF NOT EXISTS idx_playlist_songs_playlist ON playlist_songs(playlist_id);
+CREATE INDEX IF NOT EXISTS idx_playlist_songs_song ON playlist_songs(song_id);
+CREATE INDEX IF NOT EXISTS idx_listening_history_user ON listening_history(user_id);
+CREATE INDEX IF NOT EXISTS idx_listening_history_song ON listening_history(song_id);
+CREATE INDEX IF NOT EXISTS idx_room_participants_room ON room_participants(room_id);
+CREATE INDEX IF NOT EXISTS idx_room_participants_user ON room_participants(user_id);

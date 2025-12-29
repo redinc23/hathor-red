@@ -1,0 +1,141 @@
+.song-list-container {
+  padding: 20px;
+}
+
+.song-list-header {
+  margin-bottom: 30px;
+}
+
+.song-list-header h2 {
+  margin: 0 0 20px;
+  color: #333;
+}
+
+.filters {
+  display: flex;
+  gap: 15px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.genre-select {
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  cursor: pointer;
+}
+
+.genre-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 18px;
+}
+
+.song-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.song-card {
+  background: white;
+  border-radius: 12px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  border: 2px solid #e0e0e0;
+}
+
+.song-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
+}
+
+.song-card.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f5f7ff 0%, #fff 100%);
+}
+
+.song-cover {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+}
+
+.song-cover-placeholder {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 60px;
+  margin-bottom: 15px;
+}
+
+.song-info h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-info .artist {
+  margin: 0 0 5px;
+  color: #666;
+  font-size: 14px;
+}
+
+.song-info .album {
+  margin: 0 0 10px;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}
+
+.song-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.genre-tag {
+  background: #667eea;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.duration {
+  color: #999;
+  font-size: 13px;
+}
