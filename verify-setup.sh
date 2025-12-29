@@ -127,19 +127,21 @@ fi
 
 # Check if database exists
 echo "Checking database..."
+# Try to detect PostgreSQL user (postgres is most common, but could be different)
+PG_USER=${PGUSER:-postgres}
 if command -v psql &> /dev/null && pg_isready &> /dev/null; then
-    if sudo -u postgres psql -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw hathor_music; then
+    if sudo -u $PG_USER psql -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw hathor_music; then
         success "Database 'hathor_music' exists"
         
         # Check if tables exist
-        TABLE_COUNT=$(sudo -u postgres psql -d hathor_music -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
+        TABLE_COUNT=$(sudo -u $PG_USER psql -d hathor_music -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
         if [ "$TABLE_COUNT" -gt 0 ]; then
             success "Database schema is initialized ($TABLE_COUNT tables found)"
         else
-            warning "Database exists but schema not initialized (run: psql -U postgres -d hathor_music -f database/schema.sql)"
+            warning "Database exists but schema not initialized (run: psql -U $PG_USER -d hathor_music -f database/schema.sql)"
         fi
     else
-        warning "Database 'hathor_music' not found (create it with: createdb hathor_music)"
+        warning "Database 'hathor_music' not found (create it with: createdb -U $PG_USER hathor_music)"
     fi
 fi
 
