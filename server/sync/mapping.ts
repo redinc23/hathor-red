@@ -26,6 +26,7 @@ export const DEFAULT_FIELD_MAPPING: MappingConfig = {
 export const buildMappingFromRows = (rows: any[]): MappingConfig => {
   const mapping: MappingConfig = { ...DEFAULT_FIELD_MAPPING };
   rows.forEach((row) => {
+    if (!row || !row.source_field) return;
     const key = row.source_field.toLowerCase();
     mapping[key] = {
       sourceField: row.source_field,

@@ -11,6 +11,8 @@ const notion = new NotionClient({ auth: process.env.NOTION_API_KEY });
 const linear = new LinearClient({ apiKey: process.env.LINEAR_API_KEY });
 
 const timingSafeCompare = (a: string, b: string) => {
+  const hexPattern = /^[a-f0-9]+$/i;
+  if (!hexPattern.test(a) || !hexPattern.test(b)) return false;
   const aBuf = Buffer.from(a);
   const bBuf = Buffer.from(b);
   if (aBuf.length !== bBuf.length) return false;
