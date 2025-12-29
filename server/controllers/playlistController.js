@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const colabAIService = require('../services/colabAIService');
 
 const getPlaylists = async (req, res) => {
   try {
@@ -118,41 +119,81 @@ const addSongToPlaylist = async (req, res) => {
 
 const generateAIPlaylist = async (req, res) => {
   try {
-    const { prompt, name } = req.body;
+    const { prompt, name, songCount = 10 } = req.body;
 
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
 
-    // AI playlist generation logic - simplified version
-    // In production, this would use an AI model to analyze the prompt
-    const keywords = prompt.toLowerCase().split(' ');
-    let genres = [];
-    
-    if (keywords.some(k => ['chill', 'relax', 'calm'].includes(k))) {
-      genres.push('Jazz', 'Classical', 'Electronic');
-    }
-    if (keywords.some(k => ['workout', 'energy', 'pump'].includes(k))) {
-      genres.push('Rock', 'Hip Hop', 'Electronic');
-    }
-    if (keywords.some(k => ['party', 'dance', 'club'].includes(k))) {
-      genres.push('Electronic', 'Hip Hop');
-    }
-
-    if (genres.length === 0) {
-      genres = ['Rock', 'Hip Hop', 'Electronic', 'Jazz', 'Classical'];
-    }
-
-    const placeholders = genres.map((_, i) => `$${i + 1}`).join(',');
-    const songsResult = await db.query(
-      `SELECT * FROM songs WHERE genre IN (${placeholders}) ORDER BY RANDOM() LIMIT 10`,
-      genres
+    // Get user's listening history for context
+    const historyResult = await db.query(
+      `SELECT s.genre, s.artist, COUNT(*) as play_count
+       FROM listening_history lh
+       JOIN songs s ON lh.song_id = s.id
+       WHERE lh.user_id = $1
+       GROUP BY s.genre, s.artist
+       ORDER BY play_count DESC
+       LIMIT 20`,
+      [req.user.userId]
     );
 
+    const context = {
+      history: historyResult.rows,
+      favoriteGenres: [...new Set(historyResult.rows.map(r => r.genre).filter(Boolean))]
+    };
+
+    // Use Colab AI service to analyze the prompt
+    const analysis = await colabAIService.analyzePlaylistPrompt(prompt, context);
+
+    // Build query based on AI analysis
+    let genres = analysis.genres || [];
+
+    // Fallback to keyword matching if no genres detected
+    if (genres.length === 0) {
+      const keywords = prompt.toLowerCase().split(' ');
+      if (keywords.some(k => ['chill', 'relax', 'calm'].includes(k))) {
+        genres.push('Jazz', 'Classical', 'Electronic');
+      }
+      if (keywords.some(k => ['workout', 'energy', 'pump'].includes(k))) {
+        genres.push('Rock', 'Hip Hop', 'Electronic');
+      }
+      if (keywords.some(k => ['party', 'dance', 'club'].includes(k))) {
+        genres.push('Electronic', 'Hip Hop');
+      }
+      if (genres.length === 0) {
+        genres = ['Rock', 'Hip Hop', 'Electronic', 'Jazz', 'Classical'];
+      }
+    }
+
+    // Build the songs query
+    let query = 'SELECT * FROM songs WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+
+    if (genres.length > 0) {
+      const placeholders = genres.map(() => `$${paramIndex++}`).join(',');
+      query += ` AND genre IN (${placeholders})`;
+      params.push(...genres);
+    }
+
+    // Filter by year/era if provided by AI
+    if (analysis.era && analysis.era.start && analysis.era.end) {
+      query += ` AND year >= $${paramIndex++} AND year <= $${paramIndex++}`;
+      params.push(analysis.era.start, analysis.era.end);
+    }
+
+    query += ' ORDER BY RANDOM()';
+    query += ` LIMIT $${paramIndex}`;
+    params.push(Math.min(songCount, 50));
+
+    const songsResult = await db.query(query, params);
+
     const playlistName = name || `AI Playlist: ${prompt.slice(0, 30)}`;
+    const description = analysis.description || `Generated from prompt: ${prompt}`;
+
     const playlistResult = await db.query(
       'INSERT INTO playlists (user_id, name, description, is_ai_generated, prompt) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [req.user.userId, playlistName, `Generated from prompt: ${prompt}`, true, prompt]
+      [req.user.userId, playlistName, description, true, prompt]
     );
 
     const playlist = playlistResult.rows[0];
@@ -167,7 +208,12 @@ const generateAIPlaylist = async (req, res) => {
     res.status(201).json({
       message: 'AI playlist generated successfully',
       playlist,
-      songs: songsResult.rows
+      songs: songsResult.rows,
+      analysis: {
+        mood: analysis.mood,
+        genres: genres,
+        description: description
+      }
     });
   } catch (error) {
     console.error('Generate AI playlist error:', error);

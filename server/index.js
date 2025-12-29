@@ -14,6 +14,10 @@ const songRoutes = require('./routes/songs');
 const playlistRoutes = require('./routes/playlists');
 const playbackRoutes = require('./routes/playback');
 const roomRoutes = require('./routes/rooms');
+const aiRoutes = require('./routes/ai');
+
+// Import AI service for initialization
+const colabAIService = require('./services/colabAIService');
 
 const app = express();
 const server = http.createServer(app);
@@ -42,6 +46,7 @@ app.use('/api/songs', songRoutes);
 app.use('/api/playlists', playlistRoutes);
 app.use('/api/playback', playbackRoutes);
 app.use('/api/rooms', roomRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -72,6 +77,14 @@ const startServer = async () => {
     // Connect to Redis
     await connectRedis();
     console.log('Connected to Redis');
+
+    // Initialize Colab AI Service
+    const aiInitialized = await colabAIService.initialize();
+    if (aiInitialized) {
+      console.log('Colab AI Service initialized');
+    } else {
+      console.log('Colab AI Service running in fallback mode (not configured)');
+    }
 
     // Start server
     server.listen(PORT, () => {
