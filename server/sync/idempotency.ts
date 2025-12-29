@@ -1,4 +1,6 @@
-import { redisClient } from '../config/redis';
+﻿import redisConfig from '../config/redis';
+
+const { redisClient } = redisConfig;
 
 const OPERATION_PREFIX = 'sync:operation:';
 const OPERATION_TTL_SECONDS = 60 * 60 * 24;

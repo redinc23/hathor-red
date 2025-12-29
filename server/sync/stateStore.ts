@@ -1,6 +1,6 @@
 import { MAX_RETRIES } from './config';
 import { SyncJobPayload, SyncStateRecord, SyncSystem } from './types';
-import db from '../config/database';
+import * as db from '../config/database';
 
 const emptyErrorLog = '[]';
 

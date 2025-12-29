@@ -8,10 +8,11 @@ const notionLimiter = new Bottleneck({
   reservoirRefreshInterval: 1000
 });
 
+const linearRateLimit = Math.max(LINEAR_RATE_LIMIT_PER_SEC, 1);
 const linearLimiter = new Bottleneck({
-  minTime: Math.ceil(1000 / Math.max(LINEAR_RATE_LIMIT_PER_SEC, 1)),
-  reservoir: Math.max(LINEAR_RATE_LIMIT_PER_SEC, 1),
-  reservoirRefreshAmount: Math.max(LINEAR_RATE_LIMIT_PER_SEC, 1),
+  minTime: Math.ceil(1000 / linearRateLimit),
+  reservoir: linearRateLimit,
+  reservoirRefreshAmount: linearRateLimit,
   reservoirRefreshInterval: 1000
 });
 

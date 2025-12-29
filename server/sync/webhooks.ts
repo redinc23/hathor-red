@@ -5,11 +5,12 @@ import { verifyLinearSignature, verifyNotionSignature } from './clients';
 import { SyncJobPayload, SyncSystem } from './types';
 
 const router = express.Router();
+type RawBodyRequest = express.Request & { rawBody?: string };
 
 router.post('/webhook/notion', async (req, res) => {
   try {
     await initializeSyncEngine();
-    const rawBody = (req as any).rawBody || JSON.stringify(req.body || {});
+    const rawBody = (req as RawBodyRequest).rawBody ?? JSON.stringify(req.body || {});
     const signature = req.headers['x-notion-signature'] as string;
     if (!verifyNotionSignature(rawBody, signature)) {
       return res.status(401).json({ error: 'Invalid Notion signature' });
@@ -44,7 +45,7 @@ router.post('/webhook/notion', async (req, res) => {
 router.post('/webhook/linear', async (req, res) => {
   try {
     await initializeSyncEngine();
-    const rawBody = (req as any).rawBody || JSON.stringify(req.body || {});
+    const rawBody = (req as RawBodyRequest).rawBody ?? JSON.stringify(req.body || {});
     const signature = (req.headers['x-linear-signature'] as string) || (req.headers['linear-signature'] as string);
     if (!verifyLinearSignature(rawBody, signature)) {
       return res.status(401).json({ error: 'Invalid Linear signature' });

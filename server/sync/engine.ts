@@ -153,7 +153,7 @@ const handleNotionToLinear = async (payload: SyncJobPayload) => {
   }
 
   const created = await createLinearIssueFromNotion(notionProps);
-  const createdId = (created as { issue?: { id?: string }; id?: string })?.issue?.id || (created as { id?: string })?.id;
+  const createdId = created?.issue?.id || created?.id;
   if (createdId) {
     await ensurePendingState({
       ...payload,
@@ -186,7 +186,7 @@ const handleLinearToNotion = async (payload: SyncJobPayload) => {
   }
 
   const created = await createNotionPageFromLinear(issue);
-  const newPageId = (created as { id?: string })?.id;
+  const newPageId = created?.id;
   if (newPageId) {
     await ensurePendingState({
       ...payload,
