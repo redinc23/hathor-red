@@ -128,11 +128,11 @@ fi
 # Check if database exists
 echo "Checking database..."
 if command -v psql &> /dev/null && pg_isready &> /dev/null; then
-    if psql -U postgres -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw hathor_music; then
+    if sudo -u postgres psql -lqt 2>/dev/null | cut -d \| -f 1 | grep -qw hathor_music; then
         success "Database 'hathor_music' exists"
         
         # Check if tables exist
-        TABLE_COUNT=$(psql -U postgres -d hathor_music -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
+        TABLE_COUNT=$(sudo -u postgres psql -d hathor_music -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" 2>/dev/null | xargs)
         if [ "$TABLE_COUNT" -gt 0 ]; then
             success "Database schema is initialized ($TABLE_COUNT tables found)"
         else
