@@ -2,7 +2,7 @@ import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { initializeSyncEngine, enqueueSyncJob, getSyncStateRecord } from './engine';
 import { verifyLinearSignature, verifyNotionSignature } from './clients';
-import { SyncJobPayload } from './types';
+import { SyncJobPayload, SyncSystem } from './types';
 
 const router = express.Router();
 
@@ -84,7 +84,12 @@ router.post('/trigger', async (req, res) => {
     if (!direction || !entityId || !sourceRecordId) {
       return res.status(400).json({ error: 'direction, entityId and sourceRecordId are required' });
     }
-    const [sourceSystem, targetSystem] = direction.split('-to-');
+    const [sourceSystemRaw, targetSystemRaw] = direction.split('-to-');
+    if (!['notion', 'linear'].includes(sourceSystemRaw) || !['notion', 'linear'].includes(targetSystemRaw)) {
+      return res.status(400).json({ error: 'direction must be notion-to-linear or linear-to-notion' });
+    }
+    const sourceSystem = sourceSystemRaw as SyncSystem;
+    const targetSystem = targetSystemRaw as SyncSystem;
     const operationId = uuidv4();
     const job: SyncJobPayload = {
       operationId,
@@ -94,7 +99,7 @@ router.post('/trigger', async (req, res) => {
       sourceRecordId,
       targetRecordId,
       fields: req.body
-    } as any;
+    };
     const result = await enqueueSyncJob(job);
     res.json({ status: 'queued', result });
   } catch (error: any) {
@@ -109,7 +114,12 @@ router.get('/state/:entityId', async (req, res) => {
     if (!source || !target) {
       return res.status(400).json({ error: 'source and target query params are required' });
     }
-    const record = await getSyncStateRecord(entityId, String(source), String(target));
+    const sourceSystem = String(source);
+    const targetSystem = String(target);
+    if (!['notion', 'linear'].includes(sourceSystem) || !['notion', 'linear'].includes(targetSystem)) {
+      return res.status(400).json({ error: 'source and target must be notion or linear' });
+    }
+    const record = await getSyncStateRecord(entityId, sourceSystem as SyncSystem, targetSystem as SyncSystem);
     if (!record) {
       return res.status(404).json({ error: 'Sync state not found' });
     }

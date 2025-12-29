@@ -30,7 +30,7 @@ import {
   recordDeadLetter,
   recordFailure
 } from './stateStore';
-import { SyncJobPayload } from './types';
+import { SyncJobPayload, SyncSystem } from './types';
 
 let syncQueue: Queue<SyncJobPayload> | null = null;
 let deadLetterQueue: Queue<SyncJobPayload> | null = null;
@@ -132,10 +132,11 @@ const processJob = async (payload: SyncJobPayload) => {
 const handleNotionToLinear = async (payload: SyncJobPayload) => {
   const page = await fetchNotionPage(payload.sourceRecordId);
   const notionUpdated = getNotionLastEdited(page);
+  const notionProps = (page as { properties?: Record<string, any> } | null | undefined)?.properties;
 
   let linearIssue = payload.targetRecordId ? await fetchLinearIssue(payload.targetRecordId) : null;
   if (!linearIssue) {
-    const linkedId = await extractLinearIdFromNotionProperties((page as any)?.properties);
+    const linkedId = await extractLinearIdFromNotionProperties(notionProps);
     linearIssue = linkedId ? await fetchLinearIssue(linkedId) : null;
   }
 
@@ -147,12 +148,12 @@ const handleNotionToLinear = async (payload: SyncJobPayload) => {
   }
 
   if (linearIssue) {
-    await updateLinearIssueFromNotion(linearIssue.id, (page as any)?.properties);
+    await updateLinearIssueFromNotion(linearIssue.id, notionProps);
     return;
   }
 
-  const created = await createLinearIssueFromNotion((page as any)?.properties);
-  const createdId = created?.issue?.id || created?.id;
+  const created = await createLinearIssueFromNotion(notionProps);
+  const createdId = (created as { issue?: { id?: string }; id?: string })?.issue?.id || (created as { id?: string })?.id;
   if (createdId) {
     await ensurePendingState({
       ...payload,
@@ -172,9 +173,10 @@ const handleLinearToNotion = async (payload: SyncJobPayload) => {
 
   const notionPage = notionPageId ? await fetchNotionPage(notionPageId) : null;
   const notionUpdated = getNotionLastEdited(notionPage);
+  const notionProps = (notionPage as { properties?: Record<string, any> } | null | undefined)?.properties;
 
   if (notionPage && notionUpdated && linearUpdated && notionUpdated > linearUpdated) {
-    await updateLinearIssueFromNotion(issue.id, (notionPage as any)?.properties);
+    await updateLinearIssueFromNotion(issue.id, notionProps);
     return;
   }
 
@@ -184,7 +186,7 @@ const handleLinearToNotion = async (payload: SyncJobPayload) => {
   }
 
   const created = await createNotionPageFromLinear(issue);
-  const newPageId = (created as any)?.id;
+  const newPageId = (created as { id?: string })?.id;
   if (newPageId) {
     await ensurePendingState({
       ...payload,
@@ -193,5 +195,5 @@ const handleLinearToNotion = async (payload: SyncJobPayload) => {
   }
 };
 
-export const getSyncStateRecord = (entityId: string, sourceSystem: string, targetSystem: string) =>
-  getSyncState(entityId, sourceSystem as any, targetSystem as any);
+export const getSyncStateRecord = (entityId: string, sourceSystem: SyncSystem, targetSystem: SyncSystem) =>
+  getSyncState(entityId, sourceSystem, targetSystem);

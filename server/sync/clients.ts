@@ -94,25 +94,21 @@ export const createLinearIssueFromNotion = async (properties: any, mappingOverri
   return withLinearRateLimit(() => linear.issueCreate(payload));
 };
 
-export const extractLinearIdFromNotionProperties = (properties: any, mappingOverrides?: MappingConfig) => {
-  const rows = fetchFieldMappings('notion', 'linear');
-  return rows.then((rowData) => {
-    const mapping = buildMappingFromRows(rowData);
-    const merged = { ...mapping, ...mappingOverrides };
-    const linkageField = merged.linkage?.sourceField || 'LinearID';
-    const linkageProp = properties?.[linkageField];
-    return linkageProp?.rich_text?.[0]?.plain_text || null;
-  });
+export const extractLinearIdFromNotionProperties = async (properties: any, mappingOverrides?: MappingConfig) => {
+  const rows = await fetchFieldMappings('notion', 'linear');
+  const mapping = buildMappingFromRows(rows);
+  const merged = { ...mapping, ...mappingOverrides };
+  const linkageField = merged.linkage?.sourceField || 'LinearID';
+  const linkageProp = properties?.[linkageField];
+  return linkageProp?.rich_text?.[0]?.plain_text || null;
 };
 
-export const extractNotionIdFromLinearIssue = (issue: any, mappingOverrides?: MappingConfig) => {
-  const rows = fetchFieldMappings('linear', 'notion');
-  return rows.then((rowData) => {
-    const mapping = buildMappingFromRows(rowData);
-    const merged = { ...mapping, ...mappingOverrides };
-    const linkageField = merged.linkage?.targetField || 'notionId';
-    return issue?.[linkageField] || issue?.metadata?.[linkageField] || null;
-  });
+export const extractNotionIdFromLinearIssue = async (issue: any, mappingOverrides?: MappingConfig) => {
+  const rows = await fetchFieldMappings('linear', 'notion');
+  const mapping = buildMappingFromRows(rows);
+  const merged = { ...mapping, ...mappingOverrides };
+  const linkageField = merged.linkage?.targetField || 'notionId';
+  return issue?.[linkageField] || issue?.metadata?.[linkageField] || null;
 };
 
 export const getNotionLastEdited = (page: any) => (page?.last_edited_time ? new Date(page.last_edited_time) : null);

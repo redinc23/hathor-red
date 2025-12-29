@@ -1,4 +1,4 @@
-const { redisClient } = require('../config/redis');
+import { redisClient } from '../config/redis';
 
 const OPERATION_PREFIX = 'sync:operation:';
 const OPERATION_TTL_SECONDS = 60 * 60 * 24;

@@ -1,7 +1,6 @@
 import { MAX_RETRIES } from './config';
 import { SyncJobPayload, SyncStateRecord, SyncSystem } from './types';
-
-const db = require('../config/database');
+import db from '../config/database';
 
 const emptyErrorLog = '[]';
 
