@@ -1,4 +1,4 @@
-﻿import redisConfig from '../config/redis';
+import redisConfig from '../config/redis';
 
 const { redisClient } = redisConfig;
 

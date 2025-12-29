@@ -37,8 +37,11 @@ let deadLetterQueue: Queue<SyncJobPayload> | null = null;
 let scheduler: QueueScheduler | null = null;
 let worker: Worker<SyncJobPayload> | null = null;
 
+const BACKOFF_STRATEGY_NAME = 'syncBackoff';
+const DEFAULT_WORKER_CONCURRENCY = Number(process.env.SYNC_WORKER_CONCURRENCY || 5);
+
 const buildBackoff = (): JobsOptions['backoff'] => ({
-  type: 'syncBackoff'
+  type: BACKOFF_STRATEGY_NAME
 });
 
 const syncBackoffStrategy = (attemptsMade: number) => {
@@ -76,10 +79,10 @@ export const initializeSyncEngine = async () => {
     },
     {
       connection,
-      concurrency: Number(process.env.SYNC_WORKER_CONCURRENCY || 5),
+      concurrency: DEFAULT_WORKER_CONCURRENCY,
       settings: {
         backoffStrategies: {
-          syncBackoff: syncBackoffStrategy
+          [BACKOFF_STRATEGY_NAME]: syncBackoffStrategy
         }
       }
     }

@@ -11,7 +11,7 @@ router.post('/webhook/notion', async (req, res) => {
   try {
     await initializeSyncEngine();
     const rawBody = (req as RawBodyRequest).rawBody ?? JSON.stringify(req.body || {});
-    const signature = req.headers['x-notion-signature'] as string;
+    const signature = (req.headers['x-notion-signature'] as string) || (req.headers['notion-signature'] as string);
     if (!verifyNotionSignature(rawBody, signature)) {
       return res.status(401).json({ error: 'Invalid Notion signature' });
     }

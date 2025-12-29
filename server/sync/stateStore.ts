@@ -63,7 +63,7 @@ export const recordFailure = async (entityId: string, sourceSystem: SyncSystem, 
     UPDATE sync_state
     SET retry_count = retry_count + 1,
         sync_status = CASE WHEN retry_count + 1 >= $4 THEN 'failed' ELSE 'pending' END,
-        error_log = COALESCE(error_log, '[]'::jsonb) || to_jsonb($5::json),
+        error_log = COALESCE(error_log, '[]'::jsonb) || jsonb_build_array(to_jsonb($5::json)),
         version = version + 1,
         updated_at = NOW()
     WHERE entity_id=$1 AND source_system=$2 AND target_system=$3;
