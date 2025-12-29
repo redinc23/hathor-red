@@ -2,6 +2,28 @@
 
 An AI-powered music streaming platform with advanced features including on-demand playback, cross-device sync, AI playlist generation, native stem separation, vibe control sliders, and digital listening rooms with real-time synchronization.
 
+---
+
+## 🚀 Getting Started
+
+**New to the project?** Follow these steps to get up and running:
+
+1. **📖 Read the [DEVELOPMENT.md](DEVELOPMENT.md)** - Complete setup guide with prerequisites, installation, and troubleshooting
+2. **⚡ Quick Start** - See the [Quick Start](#-quick-start) section below for a fast overview
+3. **❓ Need Help?** - Check [Troubleshooting](DEVELOPMENT.md#troubleshooting) or open an issue
+
+**TL;DR - Start the app in 3 commands:**
+```bash
+npm install && cd client && npm install && cd ..  # Install dependencies
+cp .env.example .env                              # Copy environment file (edit DB_PASSWORD and JWT_SECRET)
+npm run dev                                       # Start the app → http://localhost:3000
+```
+*Note: Requires Node.js, PostgreSQL, and Redis installed. See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed setup.*
+
+**💡 Verify your setup:** Run `./verify-setup.sh` to check if everything is configured correctly.
+
+---
+
 ## ✨ Features
 
 ### Core Features
@@ -96,72 +118,68 @@ hathor-red/
 
 ## 🚀 Quick Start
 
+> **💡 For detailed setup instructions with prerequisites installation, troubleshooting, and step-by-step guidance, see [DEVELOPMENT.md](DEVELOPMENT.md)**
+
 ### Prerequisites
 
-- Node.js 18.x or higher
-- PostgreSQL 13.x or higher
-- Redis 6.x or higher
-- npm or yarn
+You need these installed on your system:
+- ✅ **Node.js 18+** - [Installation guide](DEVELOPMENT.md#1-nodejs-v18-or-higher)
+- ✅ **PostgreSQL 13+** - [Installation guide](DEVELOPMENT.md#2-postgresql-v13-or-higher)
+- ✅ **Redis 6+** - [Installation guide](DEVELOPMENT.md#3-redis-v6-or-higher)
 
-### Installation
+### Installation Steps
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd hathor-red
-   ```
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd hathor-red
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   cd client && npm install && cd ..
-   ```
+# 2. Install dependencies
+npm install && cd client && npm install && cd ..
 
-3. **Setup PostgreSQL database**
-   ```bash
-   # Create database
-   createdb hathor_music
-   
-   # Run schema
-   psql -d hathor_music -f database/schema.sql
-   
-   # (Optional) Load sample data
-   psql -d hathor_music -f database/seed.sql
-   ```
+# 3. Setup PostgreSQL database
+createdb hathor_music
+psql -U postgres -d hathor_music -f database/schema.sql
+# Optional: psql -U postgres -d hathor_music -f database/seed.sql
 
-4. **Start Redis**
-   ```bash
-   redis-server
-   ```
+# 4. Start Redis (in a separate terminal)
+redis-server
 
-5. **Configure environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+# 5. Configure environment
+cp .env.example .env
+# Edit .env: Set DB_PASSWORD and generate JWT_SECRET with: openssl rand -base64 32
 
-6. **Start the application**
-   ```bash
-   # Development mode (runs both frontend and backend)
-   npm run dev
-   
-   # Or separately:
-   # Terminal 1 - Backend
-   npm run server
-   
-   # Terminal 2 - Frontend
-   npm run client
-   ```
+# 6. Start the application
+npm run dev
+```
 
-7. **Access the application**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:5000/api
-   - Health Check: http://localhost:5000/api/health
+### Access the Application
+
+Once started, the application will be available at:
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:5000/api
+- **Health Check:** http://localhost:5000/api/health
+
+### First Time Usage
+
+1. Open http://localhost:3000 in your browser
+2. Click "Sign Up" to create an account
+3. Login with your credentials
+4. Start exploring the music platform!
+
+### Need Help?
+
+- **Setup issues?** → [Troubleshooting Guide](DEVELOPMENT.md#troubleshooting)
+- **Want more details?** → [Complete Development Guide](DEVELOPMENT.md)
+- **API documentation?** → [API.md](API.md)
 
 ## 📖 Documentation
 
+- **[DEVELOPMENT.md](DEVELOPMENT.md)** - **⭐ Start here!** Complete development setup guide
+- **[QUICKSTART.md](QUICKSTART.md)** - Abbreviated quick reference guide
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[Features Overview](FEATURES.md)** - Detailed feature descriptions
 
 ## 🎯 Key Features Explained
 
