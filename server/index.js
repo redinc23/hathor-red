@@ -1,4 +1,5 @@
 require('dotenv').config();
+require('ts-node/register');
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -15,6 +16,7 @@ const playlistRoutes = require('./routes/playlists');
 const playbackRoutes = require('./routes/playback');
 const roomRoutes = require('./routes/rooms');
 const aiRoutes = require('./routes/ai');
+const syncRoutes = require('./routes/sync');
 
 // Import AI service for initialization
 const colabAIService = require('./services/colabAIService');
@@ -34,7 +36,11 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:3000',
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString();
+  }
+}));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve uploaded files
@@ -47,6 +53,7 @@ app.use('/api/playlists', playlistRoutes);
 app.use('/api/playback', playbackRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/sync', syncRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

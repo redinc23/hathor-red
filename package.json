@@ -12,21 +12,29 @@
     "install-all": "npm install && cd client && npm install",
     "db:seed": "node database/seed.js",
     "db:generate-audio": "node database/generate-sample-audio.js",
-    "db:setup": "npm run db:generate-audio && npm run db:seed"
+    "db:setup": "npm run db:generate-audio && npm run db:seed",
+    "sync:worker": "node -r ts-node/register server/sync/worker.ts"
   },
   "keywords": ["music", "streaming", "AI", "playlist"],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
+    "@linear/sdk": "^68.1.0",
+    "@notionhq/client": "^5.6.0",
+    "bcryptjs": "^2.4.3",
+    "bottleneck": "^2.19.5",
+    "bullmq": "^5.66.4",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.11.3",
     "redis": "^4.6.10",
     "socket.io": "^4.6.2",
-    "multer": "^1.4.5-lts.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

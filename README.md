@@ -163,6 +163,18 @@ hathor-red/
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
 
+## 🔄 Notion ↔ Linear Sync Engine
+
+- Event-driven BullMQ workers backed by Redis with exponential backoff and a dead-letter queue after 5 attempts
+- Idempotent processing via operation IDs with Redis guards
+- Conflict resolution using last-write-wins based on Notion `last_edited_time` and Linear `updatedAt`
+- Sync status tracked in PostgreSQL `sync_state` with optimistic versioning and retry counters
+- Webhooks:
+  - `POST /api/sync/webhook/notion` (Notion signature validated)
+  - `POST /api/sync/webhook/linear` (Linear signature validated)
+  - `POST /api/sync/trigger` manual enqueue
+  - `GET /api/sync/state/:entityId?source=notion&target=linear`
+
 ## 🎯 Key Features Explained
 
 ### AI Playlist Generator

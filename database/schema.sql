@@ -102,3 +102,53 @@ CREATE INDEX IF NOT EXISTS idx_listening_history_user ON listening_history(user_
 CREATE INDEX IF NOT EXISTS idx_listening_history_song ON listening_history(song_id);
 CREATE INDEX IF NOT EXISTS idx_room_participants_room ON room_participants(room_id);
 CREATE INDEX IF NOT EXISTS idx_room_participants_user ON room_participants(user_id);
+
+-- ===========================================
+-- Sync Engine Data Model
+-- ===========================================
+DO $$ BEGIN
+    CREATE TYPE sync_system AS ENUM ('notion', 'linear');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
+    CREATE TYPE sync_status AS ENUM ('pending', 'syncing', 'synced', 'failed');
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+CREATE TABLE IF NOT EXISTS sync_state (
+    entity_id UUID NOT NULL,
+    source_system sync_system NOT NULL,
+    target_system sync_system NOT NULL,
+    last_synced_at TIMESTAMP,
+    sync_status sync_status NOT NULL DEFAULT 'pending',
+    retry_count INTEGER NOT NULL DEFAULT 0,
+    error_log JSONB DEFAULT '[]'::jsonb,
+    version INTEGER NOT NULL DEFAULT 1,
+    operation_id UUID,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (entity_id, source_system, target_system)
+);
+
+CREATE INDEX IF NOT EXISTS idx_sync_state_status ON sync_state(sync_status);
+CREATE INDEX IF NOT EXISTS idx_sync_state_last_synced ON sync_state(last_synced_at);
+CREATE INDEX IF NOT EXISTS idx_sync_state_operation ON sync_state(operation_id);
+
+CREATE TABLE IF NOT EXISTS sync_dead_letters (
+    id UUID PRIMARY KEY,
+    entity_id UUID NOT NULL,
+    source_system sync_system NOT NULL,
+    target_system sync_system NOT NULL,
+    failed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    reason TEXT,
+    payload JSONB
+);
+
+CREATE TABLE IF NOT EXISTS sync_field_mappings (
+    id SERIAL PRIMARY KEY,
+    source_system sync_system NOT NULL,
+    target_system sync_system NOT NULL,
+    source_field TEXT NOT NULL,
+    target_field TEXT NOT NULL,
+    direction TEXT DEFAULT 'bidirectional',
+    transform TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
