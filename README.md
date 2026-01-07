@@ -162,8 +162,12 @@ hathor-red/
 
 ## 📖 Documentation
 
+- **[Quick Start Guide](QUICKSTART.md)** - Get started in 10 minutes
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
+- **[Features Overview](FEATURES.md)** - Detailed feature descriptions and technical implementation
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[Limitations & Missing Features](LIMITATIONS.md)** - What's NOT included in this MVP
+- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Complete implementation details
 
 ## 🎯 Key Features Explained
 
