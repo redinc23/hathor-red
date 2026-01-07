@@ -1,6 +1,8 @@
 # 🎵 Hathor Music Platform
 
-An AI-powered music streaming platform with advanced features including on-demand playback, cross-device sync, AI playlist generation, native stem separation, vibe control sliders, and digital listening rooms with real-time synchronization.
+A **full-stack** AI-powered music streaming platform with advanced features including on-demand playback, cross-device sync, AI playlist generation, native stem separation, vibe control sliders, and digital listening rooms with real-time synchronization.
+
+> **📦 Full-Stack Application:** This is a complete full-stack solution with a React frontend, Node.js/Express backend, PostgreSQL database, and Redis caching layer.
 
 ## ✨ Features
 
@@ -246,6 +248,61 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 This project is licensed under the MIT License.
+
+## ⚠️ What This Platform Does NOT Include
+
+This is an MVP (Minimum Viable Product) focusing on core features. The following features are **NOT included** in the current version:
+
+### Missing Commercial Platform Features
+- ❌ **Music Licensing & Rights Management** - No integration with music labels or rights organizations
+- ❌ **Payment Processing** - No subscription plans, billing, or monetization
+- ❌ **Content Recommendation Engine** - No advanced ML-based personalized recommendations
+- ❌ **Mobile Native Apps** - Web-only, no iOS/Android native applications
+- ❌ **Offline Playback** - No download or offline listening capabilities
+- ❌ **Social Network Features** - No user following, activity feeds, or social sharing
+- ❌ **Artist/Label Accounts** - No separate account types for content creators
+- ❌ **Music Discovery** - No charts, trending, or discovery algorithms
+- ❌ **Advanced Search** - Basic search only, no fuzzy matching or complex queries
+- ❌ **Video Content** - Audio only, no music videos or visual content
+- ❌ **Podcasts & Audiobooks** - Music streaming only
+- ❌ **High-Resolution Audio** - Standard quality streaming only
+- ❌ **Lyrics & Metadata** - No synchronized lyrics or detailed metadata
+- ❌ **Concert/Event Integration** - No ticketing or event information
+- ❌ **Third-Party Integrations** - No Spotify/Apple Music imports or external API connections
+
+### Technical Limitations
+- ❌ **Production-Grade Stem Separation** - Uses Web Audio API simulation, not real AI-based stem separation (would require Spleeter/Demucs)
+- ❌ **Advanced AI Models** - Simple keyword-based AI playlist generation, not GPT/LLM integration
+- ❌ **CDN Integration** - Direct file streaming, no content delivery network
+- ❌ **Advanced Analytics** - Basic listening history only, no detailed analytics dashboard
+- ❌ **Load Balancing** - Single instance design, not horizontally scaled
+- ❌ **Comprehensive Testing** - No unit/integration test suite included
+- ❌ **CI/CD Pipeline** - No automated deployment pipeline
+- ❌ **Rate Limiting** - No API rate limiting implementation
+- ❌ **Advanced Security** - Basic JWT auth only, no OAuth, 2FA, or SSO
+- ❌ **Monitoring & APM** - No built-in application performance monitoring
+- ❌ **Backup & Recovery** - No automated backup systems
+- ❌ **Internationalization** - English only, no multi-language support
+- ❌ **Accessibility Compliance** - Basic accessibility, not WCAG 2.1 AA compliant
+- ❌ **Email System** - No email verification, notifications, or password reset emails
+
+### What You Get Instead
+This MVP provides a **solid foundation** with:
+- ✅ Complete authentication system
+- ✅ Real-time features via WebSockets
+- ✅ Working audio streaming
+- ✅ Interactive playlist management
+- ✅ Basic AI playlist generation
+- ✅ Digital listening rooms
+- ✅ Cross-device sync
+- ✅ Modern, responsive UI
+
+Perfect for:
+- 🎓 Learning full-stack development
+- 🛠️ Building a portfolio project
+- 🚀 Starting a music platform MVP
+- 🧪 Experimenting with audio APIs
+- 📚 Understanding real-time WebSocket applications
 
 ## 🙏 Acknowledgments
 
