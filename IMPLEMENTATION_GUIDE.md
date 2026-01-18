@@ -563,7 +563,7 @@ const SupportButton = ({ artistId, artistName }) => {
   return (
     <>
       <button onClick={() => setShowModal(true)}>
-        💝 Support ${artistName}
+        💝 Support {artistName}
       </button>
       {showModal && (
         <SupportModal 
@@ -741,7 +741,7 @@ export default EnhancedPlayer;
 ```javascript
 // client/src/components/player/StemController.js
 
-const StemController = ({ stem, enabled, volume, onToggle, onVolumeChange }) => {
+const StemController = ({ stem, enabled, volume, onToggle, onVolumeChange, onSolo, onMute }) => {
   const stemIcons = {
     vocals: '🎤',
     drums: '🥁',
@@ -775,10 +775,10 @@ const StemController = ({ stem, enabled, volume, onToggle, onVolumeChange }) => 
       </div>
       
       <div className="stem-actions">
-        <button onClick={() => onSolo(stem)} disabled={!enabled}>
+        <button onClick={onSolo} disabled={!enabled}>
           Solo
         </button>
-        <button onClick={() => onMute(stem)} disabled={!enabled}>
+        <button onClick={onMute} disabled={!enabled}>
           Mute
         </button>
       </div>
@@ -900,7 +900,7 @@ export default EmotionSelector;
 // client/src/components/ai/AIMusicGenerator.js
 
 import React, { useState } from 'react';
-import { generateMusic } from '../../services/ai';
+import { generateMusic, downloadTrack, addToLibrary, shareTrack } from '../../services/ai';
 
 const AIMusicGenerator = () => {
   const [prompt, setPrompt] = useState('');
@@ -1213,12 +1213,12 @@ const ListeningRoomEnhanced = ({ roomId }) => {
           <div className="room-queue">
             <h4>📋 Up Next</h4>
             {queue.map((song, i) => (
-              <div key={i} className="queue-item">
+              <div key={song.id || i} className="queue-item">
                 <span>{i + 1}.</span>
                 <span>{song.title}</span>
                 <span>{song.artist}</span>
                 {isHost && (
-                  <button onClick={() => handleControl('remove-from-queue', { index: i })}>
+                  <button onClick={() => handleControl('remove-from-queue', { songId: song.id })}>
                     ✕
                   </button>
                 )}
