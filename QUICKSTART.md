@@ -11,11 +11,11 @@ npm run install-all
 # Configure environment
 cp .env.example .env
 
-# Create DB + apply schema (PostgreSQL running)
+# Create DB + apply schema (PostgreSQL running; ensure your user has createdb privileges)
 createdb hathor_music
 psql -U postgres -d hathor_music -f database/schema.sql
 
-# Start Redis (new terminal)
+# Start Redis in a separate terminal (blocking process)
 redis-server
 
 # Run dev servers
