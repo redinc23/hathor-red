@@ -1,5 +1,7 @@
 # Hathor Music Platform - Feature Overview
 
+> **🏗️ Full-Stack Architecture:** This platform includes a complete technology stack - React frontend, Node.js/Express backend, PostgreSQL database, Redis caching, and Socket.io for real-time features.
+
 ## 🎯 Core Features
 
 ### 1. User Authentication & Profiles
@@ -411,6 +413,60 @@ socket.on('user-joined', handleUserJoin)
 - **CI/CD** - Automated deployment pipeline
 - **Microservices** - Service separation
 - **GraphQL** - Alternative to REST API
+
+---
+
+## ❌ Features NOT Included (MVP Limitations)
+
+This is an MVP focused on core streaming and social features. The following are **NOT included**:
+
+### Commercial Platform Features (Not Implemented)
+- **Music Licensing** - No rights management or label partnerships
+- **Monetization** - No subscriptions, ads, or payment processing
+- **Mobile Apps** - Web-only, no native iOS/Android apps
+- **Offline Mode** - Requires internet connection, no downloads
+- **Social Network** - No user following, feeds, or activity sharing
+- **Content Discovery** - No recommendation algorithms or trending charts
+- **Video Support** - Audio streaming only
+- **Podcasts** - Music only, no spoken-word content
+- **Hi-Res Audio** - Standard quality only
+- **Lyrics** - No synchronized lyrics display
+- **Events** - No concert or ticketing integration
+- **Third-Party Imports** - No Spotify/Apple Music sync
+
+### Technical Features (Not Implemented)
+- **Production Stem Separation** - Uses Web Audio simulation, not AI models (Spleeter/Demucs)
+- **Advanced AI** - Keyword-based generation, not GPT/LLM integration
+- **CDN** - Direct streaming, no content delivery network
+- **Analytics Dashboard** - Basic history only, no detailed insights
+- **Horizontal Scaling** - Single instance architecture
+- **Test Suite** - No automated testing included
+- **CI/CD** - No deployment automation
+- **Rate Limiting** - No API throttling
+- **OAuth/SSO** - JWT only, no third-party authentication
+- **2FA** - No two-factor authentication
+- **APM** - No application performance monitoring
+- **Email System** - No verification or notification emails
+- **i18n** - English only, no translations
+- **WCAG Compliance** - Basic accessibility only
+
+### Why These Are Not Included
+This MVP prioritizes:
+1. **Core Functionality** - Getting the essential features working well
+2. **Learning Value** - Demonstrating full-stack concepts without overwhelming complexity
+3. **Time to Market** - Faster development and deployment
+4. **Foundation First** - Building a solid base for future enhancements
+
+### How to Add Missing Features
+Many of these features can be added later:
+- **Stem Separation:** Integrate Spleeter or Demucs for server-side processing
+- **Advanced AI:** Add OpenAI GPT API for smarter playlist generation
+- **Mobile Apps:** Develop with React Native using the same API
+- **Monetization:** Integrate Stripe or PayPal
+- **Social Features:** Extend user and activity models
+- **Email:** Add Nodemailer or SendGrid
+- **Testing:** Add Jest for backend, React Testing Library for frontend
+- **CDN:** Deploy audio files to CloudFront or similar
 
 ---
 
