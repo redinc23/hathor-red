@@ -163,6 +163,22 @@ hathor-red/
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
 
+## 🧭 MVP Readiness (East Asia Niche-Market Music Platform)
+
+**How far from MVP?** Core streaming, playback, rooms, auth, and AI playlisting are implemented, so this repo covers a strong product core. To reach an MVP for an East Asia niche-market offering (think Apple Music/Spotify/Amazon Music for a specific regional audience), the main gaps are market-specific licensing, localization, and payments/compliance.
+
+**Already covered in this repo**
+- Streaming playback, playlists, listening rooms, and cross-device sync
+- User accounts/authentication and basic API surface
+- Upload pipeline and catalog primitives (songs, playlists)
+
+**Remaining for MVP in East Asia niche market**
+- Localization (language packs, typography, locale-aware search/metadata)
+- Regional licensing/catalog ingestion + rights management workflow
+- Payments for target markets (local wallets/cards, tax handling)
+- Compliance: data residency, content moderation, and regional privacy rules
+- Regional partnerships, distribution ops, and analytics for the niche audience
+
 ## 🎯 Key Features Explained
 
 ### AI Playlist Generator
