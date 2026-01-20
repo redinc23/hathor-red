@@ -11,6 +11,18 @@ Before starting, ensure you have:
 
 ## Step-by-Step Setup
 
+### 0. Get the Code Locally (1 minute)
+
+```bash
+git clone https://github.com/redinc23/hathor-red.git
+cd hathor-red
+```
+
+Already cloned? Pull the latest changes:
+```bash
+git pull
+```
+
 ### 1. Install Dependencies (2 minutes)
 
 ```bash
