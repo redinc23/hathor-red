@@ -2,6 +2,28 @@
 
 This guide will help you get the Hathor Music Platform running on your local machine in minutes.
 
+## TL;DR - See the Dev Environment Fast
+
+```bash
+# Install dependencies
+npm run install-all
+
+# Configure environment
+cp .env.example .env
+
+# Create DB + apply schema (PostgreSQL running)
+createdb hathor_music
+psql -U postgres -d hathor_music -f database/schema.sql
+
+# Start Redis (new terminal)
+redis-server
+
+# Run dev servers
+npm run dev
+```
+
+Visit http://localhost:3000 after the servers start.
+
 ## Prerequisites Check
 
 Before starting, ensure you have:
