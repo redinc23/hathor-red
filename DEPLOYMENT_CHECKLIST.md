@@ -120,7 +120,7 @@ app.use('/api/', limiter);
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
-  message: { error: 'Too many attempts, please try again later.' }
+  message: { error: 'Too many authentication attempts, please try again later.' }
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
@@ -140,7 +140,10 @@ const { body, validationResult } = require('express-validator');
 const validate = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({
+      error: 'Validation failed',
+      details: errors.array().map(e => ({ field: e.path, message: e.msg }))
+    });
   }
   next();
 };

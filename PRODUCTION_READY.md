@@ -71,7 +71,7 @@ app.use('/api/', limiter);
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10,
-  message: { error: 'Too many authentication attempts.' }
+  message: { error: 'Too many authentication attempts, please try again later.' }
 });
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
@@ -107,21 +107,22 @@ const registerValidation = [
   body('username')
     .trim()
     .isLength({ min: 3, max: 50 })
+    .withMessage('Username must be 3-50 characters')
     .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage('Username must be 3-50 alphanumeric characters'),
+    .withMessage('Username can only contain letters, numbers, and underscores'),
   body('email')
     .isEmail()
-    .normalizeEmail()
-    .withMessage('Invalid email address'),
+    .withMessage('Invalid email address')
+    .normalizeEmail(),
   body('password')
     .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters')
     .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
-    .withMessage('Password must contain uppercase, lowercase, and number'),
+    .withMessage('Password must contain at least one uppercase letter, one lowercase letter, and one number'),
   body('displayName')
     .optional()
     .trim()
     .isLength({ max: 100 })
-    .escape()
 ];
 
 const loginValidation = [
@@ -305,10 +306,11 @@ app.get('/api/health', async (req, res) => {
 
   // PostgreSQL check
   try {
-    const result = await db.query('SELECT NOW()');
+    const dbStart = Date.now();
+    await db.query('SELECT 1');
     health.checks.database = {
       status: 'healthy',
-      responseTime: Date.now() - new Date(result.rows[0].now).getTime()
+      responseTime: Date.now() - dbStart
     };
   } catch (err) {
     health.status = 'degraded';
@@ -504,16 +506,18 @@ if (process.env.SENTRY_DSN) {
 
 ## 📦 Complete Package.json Updates
 
-**Add to `devDependencies`:**
+**Add to `dependencies` (these are runtime dependencies):**
 ```json
 {
-  "devDependencies": {
-    "@sentry/node": "^7.0.0",
+  "dependencies": {
     "compression": "^1.7.4",
     "express-rate-limit": "^7.0.0",
     "express-validator": "^7.0.0",
     "helmet": "^7.0.0",
     "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "@sentry/node": "^7.0.0"
   }
 }
 ```

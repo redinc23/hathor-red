@@ -247,10 +247,16 @@ const validate = (req, res, next) => {
 };
 
 const registerValidation = [
-  body('username').trim().isLength({ min: 3, max: 50 }).escape(),
+  body('username')
+    .trim()
+    .isLength({ min: 3, max: 50 })
+    .matches(/^[a-zA-Z0-9_]+$/)
+    .withMessage('Username must be 3-50 alphanumeric characters'),
   body('email').isEmail().normalizeEmail(),
-  body('password').isLength({ min: 8 }),
-  body('displayName').optional().trim().escape()
+  body('password')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters'),
+  body('displayName').optional().trim().isLength({ max: 100 })
 ];
 
 const loginValidation = [
@@ -303,12 +309,14 @@ RUN npm ci --only=production
 COPY --from=builder /app/client/build ./client/build
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/database ./database
-COPY --from=builder /app/uploads ./uploads
 
-# Create non-root user
+# Create uploads directory (should be mounted as volume in production)
+RUN mkdir -p uploads
+
+# Create non-root user and set permissions
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-RUN chown -R nodejs:nodejs /app
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
 USER nodejs
 
 EXPOSE 5000
@@ -448,7 +456,10 @@ http {
         }
 
         location /uploads {
-            alias /app/uploads;
+            # Proxy uploads to app service (uploads are served by Express)
+            proxy_pass http://app/uploads;
+            proxy_http_version 1.1;
+            proxy_set_header Host $host;
             expires 30d;
             add_header Cache-Control "public, immutable";
         }
@@ -697,7 +708,9 @@ module.exports = {
       database: process.env.DB_NAME,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
-      ssl: { rejectUnauthorized: false }
+      // Note: For production with proper SSL certificates, set rejectUnauthorized: true
+      // Use rejectUnauthorized: false only for development or self-signed certs (not recommended)
+      ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: true } : false
     },
     pool: { min: 2, max: 10 },
     migrations: {
