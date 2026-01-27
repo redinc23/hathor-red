@@ -1,0 +1,6 @@
+[defaults]
+org=your-org
+project=hathor-music
+
+[auth]
+token=__SENTRY_AUTH_TOKEN__

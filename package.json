@@ -5,15 +5,24 @@
   "main": "server/index.js",
   "scripts": {
     "start": "node server/index.js",
-    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "dev:legacy": "concurrently \"npm run server\" \"npm run client\"",
+    "dev": "turbo run dev || npm run dev:legacy",
     "server": "nodemon server/index.js",
     "client": "cd client && npm start",
     "build": "cd client && npm run build",
+    "build:ci": "turbo run build -- --dry-run || npm run build",
     "install-all": "npm install && cd client && npm install",
     "db:seed": "node database/seed.js",
     "db:generate-audio": "node database/generate-sample-audio.js",
     "db:setup": "npm run db:generate-audio && npm run db:seed",
-    "test": "jest"
+    "db:reset": "turbo run db:reset || npm run db:setup",
+    "test": "jest",
+    "test:all": "turbo run test || npm run test",
+    "lint:ci": "turbo run lint -- --max-warnings=0 || eslint . --max-warnings=0",
+    "type-check": "turbo run type-check || tsc --noEmit",
+    "validate": "npm run type-check && npm run lint:ci && npm run test:all",
+    "prepare": "husky install",
+    "preflight": "tsc --noEmit && eslint . && audit-ci --critical"
   },
   "keywords": [
     "music",
@@ -23,6 +32,14 @@
   ],
   "author": "",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.17.0",
+    "pnpm": ">=8.0.0"
+  },
+  "volta": {
+    "node": "18.17.0"
+  },
+  "packageManager": "pnpm@8.9.0",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
@@ -36,9 +53,14 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "audit-ci": "^7.1.0",
     "concurrently": "^8.2.2",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
-    "supertest": "^7.2.2"
+    "supertest": "^7.2.2",
+    "turbo": "^2.7.6",
+    "typescript": "^5.9.3"
   }
 }
