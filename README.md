@@ -89,9 +89,12 @@ hathor-red/
 ├── .env.example           # Environment variables template
 ├── .gitignore            # Git ignore rules
 ├── package.json          # Root dependencies
-├── API.md               # API documentation
-├── DEPLOYMENT.md        # Deployment guide
-└── README.md            # This file
+├── API.md                   # API documentation
+├── ARCHITECTURE.md          # Full-stack architecture & roadmap
+├── DEPLOYMENT.md            # Deployment guide
+├── DEPLOYMENT_CHECKLIST.md  # Step-by-step deployment checklist
+├── PRODUCTION_READY.md      # Production readiness guide
+└── README.md                # This file
 ```
 
 ## 🚀 Quick Start
@@ -161,7 +164,12 @@ hathor-red/
 ## 📖 Documentation
 
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
+- **[Architecture & Roadmap](ARCHITECTURE.md)** - Full-stack architecture and deployment roadmap
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
+- **[Deployment Checklist](DEPLOYMENT_CHECKLIST.md)** - Step-by-step deployment checklist
+- **[Production Readiness](PRODUCTION_READY.md)** - Gaps and fixes for production deployment
+- **[Quick Start](QUICKSTART.md)** - Get started in minutes
+- **[Features](FEATURES.md)** - Detailed feature documentation
 
 ## 🎯 Key Features Explained
 
