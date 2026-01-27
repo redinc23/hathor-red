@@ -26,7 +26,7 @@ export const observabilityMiddleware = () => {
       sessionId: req.session?.id
     };
 
-    tracer.startSpan('http_request', {
+    const span = tracer.startSpan('http_request', {
       attributes: {
         'http.method': req.method,
         'http.route': req.path,
@@ -49,6 +49,8 @@ export const observabilityMiddleware = () => {
         method: req.method,
         path: req.path
       });
+
+      span.end();
     });
 
     next();

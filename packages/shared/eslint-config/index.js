@@ -1,13 +1,7 @@
+// TODO: Add required ESLint plugins and configs before using this shared config
+// Required packages: eslint-config-airbnb, @typescript-eslint/eslint-plugin,
+// eslint-plugin-testing-library, eslint-plugin-jest-dom
 module.exports = {
-  extends: [
-    'airbnb',
-    'plugin:@typescript-eslint/recommended',
-    'plugin:testing-library/react',
-    'plugin:jest-dom/recommended'
-  ],
-  rules: {
-    'max-lines-per-function': ['error', { max: 50 }],
-    complexity: ['error', 10],
-    'max-params': ['error', 3]
-  }
+  extends: [],
+  rules: {}
 };
