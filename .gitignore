@@ -38,6 +38,13 @@ dump.rdb
 coverage/
 .nyc_output/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
 # Temp files
 tmp/
 temp/
