@@ -33,7 +33,7 @@ Add these deliverables:
 ### 2. PRO-GRADE Project Setup
 
 Team-wide requirements:
-- One-command onboarding with `scripts/init-dev.sh`
+- Developer onboarding guide via `scripts/init-dev.sh` (provides setup instructions)
 - Shared devcontainer, VS Code settings, and tasks
 - Centralized lint, test, and type-check pipelines
 - Local stack via Docker Compose for parity
