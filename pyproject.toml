@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magic"
+version = "0.1.0"
+description = "Portable magic tooling"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [{name = "Magic Authors"}]
+dependencies = []
+
+[project.scripts]
+magic = "magic.__main__:main"
+magic-core = "magic.core:main"
+magic-test = "magic.testgen:main"
+magic-opt = "magic.optimize:main"
+magic-deploy = "magic.deploy:main"
+
+[tool.setuptools]
+packages = ["magic"]

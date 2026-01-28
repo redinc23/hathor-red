@@ -54,7 +54,7 @@ init_project_dirs() {
 
 quantum_analyze() {
   echo -e "${CYAN}Analyze...${NC}"
-  python3 magic-core.py --project "$PROJECT_ROOT" --mode analyze --limit 200
+  python3 -m magic --project "$PROJECT_ROOT" --mode analyze --limit 200
 }
 
 generate_magic() {
@@ -71,22 +71,22 @@ generate_magic() {
   local turbo_flag=""
   if [[ "$TURBO" == "true" ]]; then turbo_flag="--turbo"; fi
 
-  python3 magic-core.py --project "$PROJECT_ROOT" --mode generate --pattern "$pattern" --output "$OUT_DIR" $turbo_flag
+  python3 -m magic --project "$PROJECT_ROOT" --mode generate --pattern "$pattern" --output "$OUT_DIR" $turbo_flag
 }
 
 optimize_all() {
   echo -e "${CYAN}Optimize (safe)...${NC}"
-  python3 magic-opt.py --project "$PROJECT_ROOT" --level safe
+  python3 -m magic opt --project "$PROJECT_ROOT" --level safe
 }
 
 generate_tests() {
   echo -e "${CYAN}Generate tests...${NC}"
-  python3 magic-test.py --project "$PROJECT_ROOT" --output tests_generated --limit 200
+  python3 -m magic test --project "$PROJECT_ROOT" --output tests_generated --limit 200
 }
 
 deploy_check() {
   echo -e "${CYAN}Deploy check...${NC}"
-  python3 magic-deploy.py --project "$PROJECT_ROOT" --check --env production
+  python3 -m magic deploy --project "$PROJECT_ROOT" --check --env production
 }
 
 main() {
