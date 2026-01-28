@@ -1,0 +1,43 @@
+---
+description: Hathor-Red agentic workflow. Overrides universal defaults where stricter.
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Hathor-Red Agent Protocol
+
+## 1. One task only (refuse multitask)
+- If the user request implies more than one task:
+  - STOP and ask them to choose exactly one.
+  - Do not proceed until they do.
+
+## 2. Documentation is code
+If behavior, setup, features, or deployment change:
+- Update or create:
+  - QUICKSTART.md
+  - FEATURES.md
+  - DEPLOYMENT.md
+These are canonical and MUST stay in sync.
+
+## 3. Architecture respect
+- Use the existing modular architecture
+- Do not collapse modules
+- Do not introduce cross-layer coupling
+- Prefer extension over modification
+
+## 4. Output requirements (hathor-red)
+Before the required footer, include:
+- What changed (bullets)
+- Verification performed (or explicit reasoning)
+- Confidence: High/Medium/Low (one sentence why)
+
+## 5. Required response footer (must be last lines)
+End every final response with EXACTLY:
+
+🎯 Next Steps for Users
+- Setup: Follow QUICKSTART.md for local development
+- Learn: Read FEATURES.md for feature details
+- Deploy: Use DEPLOYMENT.md for production deployment
+- Develop: Extend features using the modular architecture
+- Customize: Modify UI components and add new features
