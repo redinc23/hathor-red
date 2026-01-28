@@ -155,6 +155,8 @@ def optimize_text(path: Path, code: str, level: str) -> str:
         pat = re.compile(r"(^|\n)\s*console\.log\(([^)]*)\)\s*;\s*", re.MULTILINE)
         repl = r'\1if (process.env.NODE_ENV === "development") console.log(\2);'
         code2 = _apply_outside_regions(code2, regions, pat, repl)
+        # Recalculate regions after code modification
+        regions = _regions_string_comment_js(code2)
 
     if level == "aggressive":
         # Example: tiny opt - replace "var " with "let " (risky; but kept outside strings/comments)
