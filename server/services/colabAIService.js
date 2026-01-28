@@ -20,6 +20,7 @@ class ColabAIService {
     this.client = null;
     this.cache = new Map();
     this.cacheTimeout = 5 * 60 * 1000; // 5 minutes
+    this.maxCacheSize = 100; // Limit memory usage
   }
 
   /**
@@ -110,9 +111,35 @@ class ColabAIService {
       topP: options.topP || 0.9
     };
 
+    // Check cache
+    const cacheKey = JSON.stringify(payload);
+    if (this.cache.has(cacheKey)) {
+      const { timestamp, data } = this.cache.get(cacheKey);
+      if (Date.now() - timestamp < this.cacheTimeout) {
+        // Refresh cache entry (LRU)
+        this.cache.delete(cacheKey);
+        this.cache.set(cacheKey, { timestamp, data });
+        return data;
+      }
+      this.cache.delete(cacheKey);
+    }
+
     try {
       const response = await this._makeRequest('generate', payload);
-      return response.text || response.content || '';
+      const result = response.text || response.content || '';
+
+      // Cache the successful result
+      if (this.cache.size >= this.maxCacheSize) {
+        const oldestKey = this.cache.keys().next().value;
+        this.cache.delete(oldestKey);
+      }
+
+      this.cache.set(cacheKey, {
+        timestamp: Date.now(),
+        data: result
+      });
+
+      return result;
     } catch (error) {
       // Use fallback generation
       return this._fallbackGenerate(prompt, options);
