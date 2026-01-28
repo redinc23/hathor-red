@@ -180,7 +180,7 @@ class ProjectDetector:
         if req.exists():
             deps.extend(
                 [
-                    line.strip().split("==")[0].lower()
+                    re.split(r'==|>=|<=|>|<|~=|!=|===', line.strip())[0].lower()
                     for line in req.read_text().splitlines()
                     if line.strip() and not line.strip().startswith("#")
                 ]
@@ -623,7 +623,6 @@ class MagicArchitect:
         _safe_mkdir(output_dir)
 
         generated: List[GeneratedFile] = []
-        now = datetime.now().strftime("%Y%m%d-%H%M%S")
 
         # Always write a README
         readme = await self.generator.generate_async("readme", {})

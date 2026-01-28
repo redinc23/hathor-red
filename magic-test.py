@@ -104,7 +104,7 @@ def _python_pytest_test_for(module_path: Path, project: Path) -> Tuple[Path, str
     rel = module_path.relative_to(project)
     name = rel.stem
     test_name = f"test_{name}.py"
-    out_rel = Path("python") / test_name
+    out_rel = Path("python") / rel.parent / test_name
 
     return out_rel, f'''"""Generated pytest tests
 Target: {rel.as_posix()}
@@ -136,7 +136,7 @@ def test_safe_hash_exists(payload):
 def _js_jest_test_for(src_path: Path, project: Path, react: bool) -> Tuple[Path, str]:
     rel = src_path.relative_to(project)
     base = rel.stem
-    out_rel = Path("javascript") / f"{base}.test.js"
+    out_rel = Path("javascript") / rel.parent / f"{base}.test.js"
 
     if react and rel.suffix.lower() in {".jsx", ".tsx"}:
         return out_rel, f"""// Generated Jest + RTL test

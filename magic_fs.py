@@ -120,11 +120,11 @@ class QuantumFileSystem:
         if len(data) < self.compress_threshold:
             return data
         comp = zlib.compress(data, level=3)
-        return b"Z" + comp
+        return b"ZC" + comp
 
     def _maybe_decompress(self, payload: bytes) -> bytes:
-        if payload[:1] == b"Z":
-            return zlib.decompress(payload[1:])
+        if payload[:2] == b"ZC":
+            return zlib.decompress(payload[2:])
         return payload
 
     def _cache_set(self, key: str, payload: bytes) -> None:
