@@ -5,11 +5,14 @@ const core = require("@actions/core");
 const github = require("@actions/github");
 
 const STATE_PATH = path.join(process.cwd(), ".github", "bug-to-issue-state.json");
+const TITLE_MAX = 240;
+const TOP_LINE_MAX = 160;
 
 function readJsonSafe(p, fallback) {
   try {
     return JSON.parse(fs.readFileSync(p, "utf8"));
-  } catch {
+  } catch (err) {
+    core.warning(`Failed to parse state file at ${p}: ${err.message}`);
     return fallback;
   }
 }
@@ -28,14 +31,14 @@ function normalizeSignature({ workflowName, jobName, stepName, topLine }) {
     `workflow:${workflowName || "unknown"}`,
     `job:${jobName || "unknown"}`,
     `step:${stepName || "unknown"}`,
-    `top:${(topLine || "unknown").slice(0, 160)}`
+    `top:${(topLine || "unknown").slice(0, TOP_LINE_MAX)}`
   ].join("|");
   return sha1(raw);
 }
 
 function formatIssueTitle({ workflowName, jobName, stepName }) {
   const parts = [workflowName, jobName, stepName].filter(Boolean);
-  return `CI failing continuously: ${parts.join(" / ")}`.slice(0, 240);
+  return `CI failing continuously: ${parts.join(" / ")}`.slice(0, TITLE_MAX);
 }
 
 function pickTopErrorLine(logText) {
@@ -69,7 +72,7 @@ async function main() {
   const closeAfterSuccesses = Number(process.env.CLOSE_AFTER_SUCCESSES || "2");
 
   if (!token || !owner || !repo || !runId) {
-    throw new Error("Missing required env vars (GITHUB_TOKEN/OWNER/REPO/RUN_ID).");
+    throw new Error("Missing required env vars: GITHUB_TOKEN, OWNER, REPO, or RUN_ID.");
   }
 
   const octokit = github.getOctokit(token);
@@ -79,14 +82,21 @@ async function main() {
     items: {}
   });
 
-  const jobsResp = await octokit.rest.actions.listJobsForWorkflowRun({
-    owner,
-    repo,
-    run_id: runId,
-    per_page: 100
-  });
-
-  const jobs = jobsResp.data.jobs || [];
+  let page = 1;
+  const jobs = [];
+  while (true) {
+    const jobsResp = await octokit.rest.actions.listJobsForWorkflowRun({
+      owner,
+      repo,
+      run_id: runId,
+      per_page: 100,
+      page
+    });
+    const pageJobs = jobsResp.data.jobs || [];
+    jobs.push(...pageJobs);
+    if (pageJobs.length < 100) break;
+    page += 1;
+  }
   core.info(`Found ${jobs.length} jobs in workflow run ${runId}. Conclusion: ${conclusion}`);
 
   const now = new Date().toISOString();
@@ -96,12 +106,15 @@ async function main() {
     const existing = state.items[sig]?.issueNumber;
 
     if (existing) {
-      await octokit.rest.issues.createComment({
+      const res = await octokit.rest.issues.createComment({
         owner,
         repo,
         issue_number: existing,
         body
       });
+      if (res.status < 200 || res.status >= 300) {
+        throw new Error(`Failed to comment on issue #${existing}: status ${res.status}`);
+      }
       return existing;
     }
 
@@ -114,7 +127,11 @@ async function main() {
       labels
     });
 
-    return created.data.number;
+    const issueNumber = created?.data?.number;
+    if (!issueNumber) {
+      throw new Error("Issue creation returned no issue number.");
+    }
+    return issueNumber;
   }
 
   async function closeIssue(issueNumber, commentBody) {
@@ -150,7 +167,7 @@ async function main() {
         logText = logs.data;
       } else if (Buffer.isBuffer(logs.data)) {
         const asString = logs.data.toString("utf8");
-        if (asString.startsWith("PK")) {
+        if (asString.startsWith("PK\u0003\u0004")) {
           logText = "";
         } else {
           logText = asString;
@@ -158,7 +175,7 @@ async function main() {
       } else {
         try {
           logText = Buffer.from(logs.data).toString("utf8");
-          if (logText.startsWith("PK")) logText = "";
+          if (logText.startsWith("PK\u0003\u0004")) logText = "";
         } catch {
           logText = "";
         }
