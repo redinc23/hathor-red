@@ -102,3 +102,8 @@ CREATE INDEX IF NOT EXISTS idx_listening_history_user ON listening_history(user_
 CREATE INDEX IF NOT EXISTS idx_listening_history_song ON listening_history(song_id);
 CREATE INDEX IF NOT EXISTS idx_room_participants_room ON room_participants(room_id);
 CREATE INDEX IF NOT EXISTS idx_room_participants_user ON room_participants(user_id);
+
+-- New Indexes on Songs Table
+CREATE INDEX IF NOT EXISTS idx_songs_genre ON songs(genre);
+CREATE INDEX IF NOT EXISTS idx_songs_artist ON songs(artist);
+CREATE INDEX IF NOT EXISTS idx_songs_created_at ON songs(created_at);
