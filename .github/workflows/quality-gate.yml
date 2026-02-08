@@ -19,3 +19,5 @@ jobs:
         run: npm ci
       - name: Run validation
         run: npm run validate
+        env:
+          ESLINT_USE_FLAT_CONFIG: false
