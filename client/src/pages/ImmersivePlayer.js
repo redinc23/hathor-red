@@ -171,7 +171,7 @@ const LyricsPanel = ({ lyrics, currentTime, isOpen, onClose }) => {
 const ImmersivePlayer = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isPlaying, pause, resume, playSong } = usePlayer();
+  const { pause, resume, playSong } = usePlayer();
 
   const track = MOCK_TRACKS[id] || MOCK_TRACKS[1];
 
