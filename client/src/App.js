@@ -7,6 +7,9 @@ import Register from './components/Register';
 import Home from './pages/Home';
 import Rooms from './pages/Rooms';
 import ListeningRoom from './components/ListeningRoom';
+import DiscoverFeed from './pages/DiscoverFeed';
+import ImmersivePlayer from './pages/ImmersivePlayer';
+import PlaylistDetail from './pages/PlaylistDetail';
 import './App.css';
 
 const PrivateRoute = ({ children }) => {
@@ -77,6 +80,10 @@ function App() {
                 }
               />
               <Route path="/playlists" element={<PrivateRoute><Home /></PrivateRoute>} />
+              {/* New React Pages */}
+              <Route path="/discover" element={<DiscoverFeed />} />
+              <Route path="/player/:id" element={<ImmersivePlayer />} />
+              <Route path="/playlist/:id" element={<PlaylistDetail />} />
             </Routes>
           </div>
         </PlayerProvider>
