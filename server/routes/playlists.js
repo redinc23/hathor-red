@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const playlistController = require('../controllers/playlistController');
 const authMiddleware = require('../middleware/auth');
+const { playlistValidation, aiPlaylistValidation, idParamValidation, validate } = require('../middleware/validation');
 
 router.get('/', authMiddleware, playlistController.getPlaylists);
-router.get('/:id', authMiddleware, playlistController.getPlaylistById);
-router.post('/', authMiddleware, playlistController.createPlaylist);
+router.get('/:id', authMiddleware, idParamValidation, validate, playlistController.getPlaylistById);
+router.post('/', authMiddleware, playlistValidation, validate, playlistController.createPlaylist);
 router.post('/add-song', authMiddleware, playlistController.addSongToPlaylist);
-router.post('/generate-ai', authMiddleware, playlistController.generateAIPlaylist);
-router.delete('/:id', authMiddleware, playlistController.deletePlaylist);
+router.post('/generate-ai', authMiddleware, aiPlaylistValidation, validate, playlistController.generateAIPlaylist);
+router.delete('/:id', authMiddleware, idParamValidation, validate, playlistController.deletePlaylist);
 
 module.exports = router;
