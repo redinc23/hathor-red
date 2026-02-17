@@ -9,7 +9,7 @@ dependencies:
     specifier: ^2.4.3
     version: 2.4.3
   compression:
-    specifier: ^1.8.1
+    specifier: ^1.7.4
     version: 1.8.1
   cors:
     specifier: ^2.8.5
@@ -21,14 +21,14 @@ dependencies:
     specifier: ^4.18.2
     version: 4.22.1
   express-rate-limit:
-    specifier: ^8.2.1
-    version: 8.2.1(express@4.22.1)
+    specifier: ^7.1.0
+    version: 7.5.1(express@4.22.1)
   express-validator:
-    specifier: ^7.3.1
+    specifier: ^7.0.1
     version: 7.3.1
   helmet:
-    specifier: ^8.1.0
-    version: 8.1.0
+    specifier: ^7.1.0
+    version: 7.2.0
   jsonwebtoken:
     specifier: ^9.0.2
     version: 9.0.3
@@ -48,7 +48,7 @@ dependencies:
     specifier: ^9.0.1
     version: 9.0.1
   winston:
-    specifier: ^3.19.0
+    specifier: ^3.11.0
     version: 3.19.0
 
 devDependencies:
@@ -1853,14 +1853,13 @@ packages:
       jest-util: 29.7.0
     dev: true
 
-  /express-rate-limit@8.2.1(express@4.22.1):
-    resolution: {integrity: sha512-PCZEIEIxqwhzw4KF0n7QF4QqruVTcF73O5kFKUnGOyjbCCgizBBiFaYpd/fnBLUMPw/BWw9OsiN7GgrNYr7j6g==}
+  /express-rate-limit@7.5.1(express@4.22.1):
+    resolution: {integrity: sha512-7iN8iPMDzOMHPUYllBEsQdWVB6fPDMPqwjBaFrgr4Jgr/+okjvzAy+UHlYYL/Vs0OsOrMkwS6PJDkFlJwoxUnw==}
     engines: {node: '>= 16'}
     peerDependencies:
       express: '>= 4.11'
     dependencies:
       express: 4.22.1
-      ip-address: 10.0.1
     dev: false
 
   /express-validator@7.3.1:
@@ -2158,9 +2157,9 @@ packages:
     dependencies:
       function-bind: 1.1.2
 
-  /helmet@8.1.0:
-    resolution: {integrity: sha512-jOiHyAZsmnr8LqoPGmCjYAaiuWwjAPLgY8ZX2XrmHawt99/u1y6RgrZMTeoPfpUbV96HOalYgz1qzkRbw54Pmg==}
-    engines: {node: '>=18.0.0'}
+  /helmet@7.2.0:
+    resolution: {integrity: sha512-ZRiwvN089JfMXokizgqEPXsl2Guk094yExfoDXR0cBYWxtBbaSww/w+vT4WEJsBW2iTUi1GgZ6swmoug3Oy4Xw==}
+    engines: {node: '>=16.0.0'}
     dev: false
 
   /html-escaper@2.0.2:
@@ -2237,11 +2236,6 @@ packages:
 
   /inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
-
-  /ip-address@10.0.1:
-    resolution: {integrity: sha512-NWv9YLW4PoW2B7xtzaS3NCot75m6nK7Icdv0o3lfMceJVRfSoQwqD4wEH5rLwoKJwUiZ/rfpiVBhnaF0FK4HoA==}
-    engines: {node: '>= 12'}
-    dev: false
 
   /ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}

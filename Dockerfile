@@ -1,5 +1,5 @@
 # Build stage
-FROM node:20-alpine AS builder
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ RUN npm install -g pnpm@8.9.0
 
 # Copy package files
 COPY package.json pnpm-lock.yaml ./
-COPY client/package.json client/pnpm-lock.yaml* ./client/
+COPY client/package.json client/pnpm-lock.yaml ./client/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
@@ -18,10 +18,10 @@ RUN cd client && pnpm install --frozen-lockfile
 COPY . .
 
 # Build client
-RUN cd client && pnpm run build
+RUN cd client && npm run build
 
 # Production stage
-FROM node:20-alpine
+FROM node:18-alpine
 
 WORKDIR /app
 
@@ -37,13 +37,14 @@ COPY --from=builder /app/client/build ./client/build
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/database ./database
 
-# Create uploads and logs directories
+# Create necessary directories
 RUN mkdir -p uploads logs
 
 # Create non-root user and set permissions
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
-    chown -R nodejs:nodejs /app
+    chown -R nodejs:nodejs /app && \
+    chmod -R 755 /app/uploads /app/logs
 USER nodejs
 
 EXPOSE 5000
