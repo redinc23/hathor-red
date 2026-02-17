@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -21,7 +21,7 @@ COPY . .
 RUN cd client && pnpm run build
 
 # Production stage
-FROM node:18-alpine
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -37,8 +37,8 @@ COPY --from=builder /app/client/build ./client/build
 COPY --from=builder /app/server ./server
 COPY --from=builder /app/database ./database
 
-# Create uploads directory
-RUN mkdir -p uploads
+# Create uploads and logs directories
+RUN mkdir -p uploads logs
 
 # Create non-root user and set permissions
 RUN addgroup -g 1001 -S nodejs && \
