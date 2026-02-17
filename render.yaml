@@ -1,0 +1,15 @@
+# Render.com blueprint — alternative to Railway
+# 1. Create PostgreSQL and Redis in Render dashboard first
+# 2. Connect this repo; Render reads this file
+# 3. Add DATABASE_URL, REDIS_URL, JWT_SECRET, CLIENT_URL in Environment
+
+services:
+  - type: web
+    name: hathor-music
+    env: docker
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRE
+        value: 7d

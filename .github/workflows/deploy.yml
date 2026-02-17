@@ -1,15 +1,15 @@
-# Deploy on merge to main — see PR through to deployment
-# Per REPO-STANDARD: No merge to main without deploy path.
-# Add DEPLOY_WEBHOOK_URL secret for Chat alerts on fail.
+# Deploy to Railway — push to main = live
+# 1. Add DEPLOY_HOOK secret (Railway → Settings → Deployments → Deploy Hook)
+# 2. Railway auto-deploys when this workflow triggers it (after CI passes)
 
-name: Deploy
+name: Deploy to Production
 
 on:
   push:
     branches: [main]
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,14 +34,23 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Deploy
-        run: pnpm run deploy
+      - name: Trigger Railway deploy
+        if: success()
+        run: |
+          if [ -n "${{ secrets.DEPLOY_HOOK }}" ]; then
+            echo "Triggering Railway deploy..."
+            curl -X POST "${{ secrets.DEPLOY_HOOK }}"
+          else
+            echo "DEPLOY_HOOK not set. Add it in GitHub Secrets after connecting Railway."
+            echo "Railway may still auto-deploy if connected via GitHub."
+          fi
+        continue-on-error: true
 
       - name: Notify on failure
         if: failure()
         run: |
           if [ -n "${{ secrets.DEPLOY_WEBHOOK_URL }}" ]; then
-            curl -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
+            curl -s -X POST "${{ secrets.DEPLOY_WEBHOOK_URL }}" \
               -H "Content-Type: application/json" \
-              -d "{\"text\": \"❌ Deploy failed: ${{ github.repository }} (main)\nRun: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
+              -d "{\"text\": \"❌ Deploy failed: ${{ github.repository }}\n${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\"}"
           fi

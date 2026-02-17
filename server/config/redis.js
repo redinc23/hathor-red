@@ -1,13 +1,16 @@
 const redis = require('redis');
 
-const redisClient = redis.createClient({
-  host: process.env.REDIS_HOST || 'localhost',
-  port: process.env.REDIS_PORT || 6379,
-  password: process.env.REDIS_PASSWORD || undefined,
-  socket: {
-    reconnectStrategy: (retries) => Math.min(retries * 50, 500)
-  }
-});
+// Railway/Render provide REDIS_URL; fallback to individual vars
+const redisClient = process.env.REDIS_URL
+  ? redis.createClient({ url: process.env.REDIS_URL })
+  : redis.createClient({
+      socket: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
+        reconnectStrategy: (retries) => Math.min(retries * 50, 500),
+      },
+      password: process.env.REDIS_PASSWORD || undefined,
+    });
 
 redisClient.on('error', (err) => {
   console.error('Redis Client Error', err);

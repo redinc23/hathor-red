@@ -1,0 +1,37 @@
+# Health check — pings app every 15 min, alerts if down
+# Add ALERT_WEBHOOK_URL (Google Chat/Slack) and APP_URL secrets
+
+name: Health Check
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # Every 15 minutes
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if app is alive
+        id: health
+        run: |
+          URL="${{ secrets.APP_URL }}"
+          if [ -z "$URL" ]; then
+            echo "APP_URL not set. Add your live URL (e.g. https://hathor-music.up.railway.app) to GitHub Secrets."
+            exit 0
+          fi
+          if curl -sf --max-time 30 "${URL}/api/health" > /dev/null; then
+            echo "status=ok" >> $GITHUB_OUTPUT
+          else
+            echo "status=down" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Alert if down
+        if: failure()
+        run: |
+          if [ -n "${{ secrets.ALERT_WEBHOOK_URL }}" ]; then
+            curl -s -X POST "${{ secrets.ALERT_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"text\": \"🚨 Hathor app is DOWN! ${{ secrets.APP_URL }}/api/health\"}"
+          fi
