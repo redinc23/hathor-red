@@ -1,8 +1,8 @@
 /**
  * Database Seed Script
  *
- * This script seeds the database with sample data for development.
- * It properly hashes passwords using bcrypt instead of using placeholder hashes.
+ * DEV ONLY. Never run in production.
+ * Seeds sample data for development. Passwords are hashed before insert.
  *
  * Usage: node database/seed.js
  */

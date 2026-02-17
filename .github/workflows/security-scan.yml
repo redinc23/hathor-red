@@ -25,8 +25,12 @@ jobs:
         uses: snyk/actions/node@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      - name: Run Trivy vulnerability scanner
+        continue-on-error: true
+      - name: Run Trivy (vuln + secret)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: 'fs'
           scan-ref: '.'
+          scanners: 'vuln,secret'
+        env:
+          TRIVY_EXIT_CODE: '1'

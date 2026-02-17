@@ -21,6 +21,7 @@
 | 4.1 | Feb 17, 2026 | Engineering | Google-first mandate; operational automations (PR staleness, nudges); no 3rd party where Google suffices |
 | 4.2 | Feb 17, 2026 | Engineering | Research phase (NotebookLM, Drive); Prototype phase; mandatory Cloud Build per repo (zero exceptions); continuous improvement; SDLC/bug tracking |
 | 4.3 | Feb 17, 2026 | Engineering | Gap analysis; standardized controls (no secrets, vuln scan, repo template); Looker Studio dashboard; Chat #pipeline; 3rd party pressure audit |
+| 4.4 | Feb 17, 2026 | Engineering | REPO STANDARD (all 48 repos); current repo audit; deploy workflow; secret scan; docs/rollback.md |
 
 ---
 
@@ -462,6 +463,8 @@ X-Idempotency-Key: <uuid>
 
 ## Appendix B: Referenced Runbooks & Deep Dives
 
+- [REPO STANDARD](REPO-STANDARD.md) — **Apply to all 48 repos.** Mandatory workflows; agents; no fire drills.
+- [Current Repo Audit](deep-dives/CURRENT-REPO-AUDIT.md) — What shouldn't be there; missing workflows; fixes applied.
 - [Gap Analysis: What Can Go Wrong?](deep-dives/GAP-ANALYSIS-WHAT-CAN-GO-WRONG.md) — Underutilized Google tools; 3rd party pressure; standardized controls; visualization
 - [Steps 1–2 Deep Dive (Intake)](deep-dives/STEPS-01-02-INTAKE-DEEP-DIVE.md) — Form→Pub/Sub→Validation; anti-patterns; failure modes
 - [Incident Response](runbooks/incident-response.md)
