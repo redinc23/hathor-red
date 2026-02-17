@@ -163,6 +163,8 @@ hathor-red/
 
 ## 📖 Documentation
 
+- **[Standards Living Document](docs/STANDARDS_LIVING_DOCUMENT.md)** - Rock-hard repeatable standards, AI prompts, juncture controls
+- **[Deploy (Railway/Render)](DEPLOY.md)** - Get live in 15 min
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
 - **[Architecture & Roadmap](ARCHITECTURE.md)** - Full-stack architecture and deployment roadmap
 - **[Deployment Guide](DEPLOYMENT.md)** - Production deployment instructions
