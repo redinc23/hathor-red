@@ -12,6 +12,10 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install -U pip
+        working-directory: current-state-doc-tool
       - run: pip install -e ".[dev]"
+        working-directory: current-state-doc-tool
       - run: ruff check .
+        working-directory: current-state-doc-tool
       - run: pytest -q
+        working-directory: current-state-doc-tool

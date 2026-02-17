@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from app.models import BacklogItem, Component, ComponentEvidence, Evidence, Risk
@@ -19,6 +20,12 @@ def list_evidence(db: Session) -> list[Evidence]:
 
 
 def create_component(db: Session, payload: ComponentIn) -> Component:
+    existing = db.exec(select(Component).where(Component.name == payload.name)).first()
+    if existing is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Component with name '{payload.name}' already exists",
+        )
     c = Component(
         name=payload.name,
         comp_type=payload.comp_type,
@@ -45,7 +52,8 @@ def attach_component_evidence(db: Session, component_id: int, payload: Component
     for row in existing:
         db.delete(row)
 
-    for ev_id in payload.evidence_ids:
+    unique_evidence_ids = list(set(payload.evidence_ids))
+    for ev_id in unique_evidence_ids:
         if db.get(Evidence, ev_id) is None:
             raise ValueError(f"Evidence not found: {ev_id}")
         db.add(ComponentEvidence(component_id=component_id, evidence_id=ev_id))

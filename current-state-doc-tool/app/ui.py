@@ -5,7 +5,7 @@ from fastapi.responses import HTMLResponse, PlainTextResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlmodel import Session, select
 
-from app.deps import allow_anonymous_ui, get_db
+from app.deps import allow_anonymous_ui, get_db, require
 from app.models import Component, ComponentEvidence, Evidence
 from app.reports import generate_markdown_report
 
@@ -45,7 +45,7 @@ def ui_report(db: Session = Depends(get_db)) -> str:
     return generate_markdown_report(db)
 
 
-@router.post("/seed", dependencies=[Depends(allow_anonymous_ui)])
+@router.post("/seed", dependencies=[Depends(require("component:write"))])
 def ui_seed(db: Session = Depends(get_db)) -> RedirectResponse:
     if db.exec(select(Component)).first() is None:
         db.add(Component(name="Authentication & session management", comp_type="Core"))
