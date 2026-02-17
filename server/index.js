@@ -125,16 +125,14 @@ app.get('/api/health', async (req, res) => {
 });
 
 // Serve React App (Static)
-if (process.env.NODE_ENV === 'production') {
-  const clientBuildPath = path.join(__dirname, '../client/build');
-  app.use(express.static(clientBuildPath));
+const clientBuildPath = path.join(__dirname, '../client/build');
+app.use(express.static(clientBuildPath));
 
-  // SPA Fallback: Any route not handled by API returns index.html
-  app.get('*', (req, res, next) => {
-    if (req.url.startsWith('/api/')) return next();
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  });
-}
+// SPA Fallback: Any route not handled by API returns index.html
+app.get('*', (req, res, next) => {
+  if (req.url.startsWith('/api')) return next();
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
 
 // Socket.io handlers
 setupSocketHandlers(io);
