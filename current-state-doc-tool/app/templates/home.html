@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Current-State Dashboard</title>
+    <style>
+      body { font-family: ui-sans-serif, system-ui, -apple-system; margin: 24px; }
+      .pill { display: inline-block; padding: 4px 10px; border: 1px solid #ddd; border-radius: 999px; margin-right: 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+      th, td { border-bottom: 1px solid #eee; padding: 10px; vertical-align: top; text-align: left; }
+      code { background: #f6f8fa; padding: 2px 6px; border-radius: 6px; }
+      .muted { color: #666; }
+      .actions { margin-top: 16px; display: flex; gap: 10px; align-items: center; }
+      a { text-decoration: none; }
+      .btn { padding: 8px 12px; border: 1px solid #ddd; border-radius: 10px; }
+    </style>
+  </head>
+  <body>
+    <h1>Current-State Dashboard</h1>
+    <p class="muted">Component statuses should be evidence-linked; prefer Unknown over guessing.</p>
+
+    <div>
+      <span class="pill">Working: {{ counts["Working"] }}</span>
+      <span class="pill">Degraded: {{ counts["Degraded"] }}</span>
+      <span class="pill">Failing: {{ counts["Failing"] }}</span>
+      <span class="pill">Unknown: {{ counts["Unknown"] }}</span>
+    </div>
+
+    <div class="actions">
+      <form method="post" action="/seed">
+        <button class="btn" type="submit">Seed baseline components</button>
+      </form>
+      <a class="btn" href="/report.md">View generated report.md</a>
+      <a class="btn" href="/docs">Open API docs</a>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Owner</th>
+          <th>Evidence</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in components %}
+        <tr>
+          <td><strong>{{ c.name }}</strong><br/><span class="muted">{{ c.description }}</span></td>
+          <td>{{ c.comp_type }}</td>
+          <td><code>{{ c.status.value }}</code></td>
+          <td>{{ c.owner }}</td>
+          <td>
+            {% set evs = evidence_by_component.get(c.id, []) %}
+            {% if evs %}
+              <ul>
+              {% for ev in evs %}
+                <li><a href="{{ ev.url_or_ref }}">{{ ev.title }}</a> <span class="muted">{{ ev.notes }}</span></li>
+              {% endfor %}
+              </ul>
+            {% else %}
+              <span class="muted">Unspecified</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <h2>How to use</h2>
+    <ol>
+      <li>Login via <code>/auth/login</code> to get a token.</li>
+      <li>Create evidence via <code>/api/evidence</code>.</li>
+      <li>Create components via <code>/api/components</code> and attach evidence via <code>/api/components/{id}/evidence</code>.</li>
+      <li>Export markdown via <code>/api/report.md</code> (auth) or <code>/report.md</code> (public).</li>
+    </ol>
+  </body>
+</html>
