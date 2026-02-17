@@ -84,8 +84,8 @@ Each step is a discrete state transition with defined inputs, outputs, success c
 
 | Step | State | Trigger | Actions | Success Criteria | Compensating Action |
 |------|-------|---------|---------|------------------|---------------------|
-| **1** | `IDEA_SUBMITTED` | Form submit | Apps Script publishes to Pub/Sub `intake-ideas` | Message in Pub/Sub | N/A (idempotent) |
-| **2** | `INTAKE_VALIDATED` | Pub/Sub event | Function validates payload (schema, required fields) | Valid JSON, no PII in logs | Reject to DLQ |
+| **1** | `IDEA_SUBMITTED` | Form submit | **Apps Script `onFormSubmit`** (installable—never `onOpen`) publishes to Pub/Sub `intake-ideas`; fallback: Cloud Scheduler polls Sheet every 15 min for unprocessed rows | Message in Pub/Sub | N/A (idempotent) |
+| **2** | `INTAKE_VALIDATED` | Pub/Sub event | Function validates payload; **idempotency:** check Firestore for existing `projectId` before processing | Valid JSON, no PII in logs | Reject to DLQ |
 | **3** | `BRIEF_REQUESTED` | Validation pass | Publish to `brief-requests` | Message published | N/A |
 | **4** | `BRIEF_AI_GENERATING` | Brief request | Vertex AI generates product brief | Brief draft in Firestore | Retry (3x) or escalate |
 | **5** | `BRIEF_DRAFT_READY` | AI complete | Store in Firestore `projects/{id}/brief` | Document created | Delete draft |
@@ -180,6 +180,7 @@ The system is a Saga-orchestrated pipeline treating product development as a dis
 - **Saga Pattern:** Orchestration mode (central coordinator) for 25 steps; choreography for simple events
 - **CAP:** AP for Firestore (availability); CP for BigQuery (audits)
 - **Diagrams as Code:** Mermaid in **Google Docs** (Markdown) or **Google Drawings**; version-controlled in Cloud Source Repositories
+- **Apps Script anti-pattern:** Never use `onOpen` or `onEdit` for critical pipeline triggers—they require human action. Use `onFormSubmit` (event-driven) or time-driven (Cloud Scheduler). See [Steps 1–2 Deep Dive](deep-dives/STEPS-01-02-INTAKE-DEEP-DIVE.md).
 
 ---
 
@@ -377,8 +378,9 @@ X-Idempotency-Key: <uuid>
 
 ---
 
-## Appendix B: Referenced Runbooks
+## Appendix B: Referenced Runbooks & Deep Dives
 
+- [Steps 1–2 Deep Dive (Intake)](deep-dives/STEPS-01-02-INTAKE-DEEP-DIVE.md) — Form→Pub/Sub→Validation; anti-patterns; failure modes
 - [Incident Response](runbooks/incident-response.md)
 - [Disaster Recovery](runbooks/disaster-recovery.md)
 - [Quality Gates](runbooks/quality-gates.md)
