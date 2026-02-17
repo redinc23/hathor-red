@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="APP_", extra="ignore")
 
     db_url: str = "sqlite:///./app.db"
-    jwt_secret: str = "dev-secret-change-me"
+    jwt_secret: str
     jwt_issuer: str = "current-state-doc-tool"
     jwt_ttl_minutes: int = 60 * 12
 

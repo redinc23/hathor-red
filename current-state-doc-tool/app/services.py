@@ -33,6 +33,8 @@ def list_components(db: Session) -> list[Component]:
 def attach_component_evidence(db: Session, component_id: int, payload: ComponentAttachEvidenceIn) -> None:
     if db.get(Component, component_id) is None:
         raise ValueError("Component not found")
+    if len(payload.evidence_ids) != len(set(payload.evidence_ids)):
+        raise ValueError("Duplicate evidence IDs are not allowed")
     existing = db.exec(select(ComponentEvidence).where(ComponentEvidence.component_id == component_id)).all()
     for row in existing:
         db.delete(row)

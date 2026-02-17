@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 
 from app.deps import get_db, require
@@ -58,14 +59,19 @@ def api_attach_component_evidence(component_id: int, payload: ComponentAttachEvi
     try:
         attach_component_evidence(db, component_id, payload)
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        error_msg = str(e)
+        if "Duplicate" in error_msg:
+            raise HTTPException(status_code=400, detail=error_msg)
+        raise HTTPException(status_code=404, detail=error_msg)
+    except IntegrityError as e:
+        raise HTTPException(status_code=400, detail="Duplicate evidence IDs are not allowed")
     return {"status": "ok"}
 
 
 @router.post("/backlog", response_model=BacklogOut, dependencies=[Depends(require("backlog:write"))])
 def api_create_backlog(payload: BacklogIn, db: Session = Depends(get_db)) -> BacklogOut:
     b = create_backlog_item(db, payload)
-    return BacklogOut(id=b.id, wsjf=b.wsjf, **payload.model_dump())  # type: ignore[arg-type]
+    return BacklogOut(id=b.id, wsjf=b.wsjf, title=b.title, item_type=b.item_type, business_value=b.business_value, cost_of_delay=b.cost_of_delay, job_size=b.job_size, notes=b.notes)  # type: ignore[arg-type]
 
 
 @router.get("/backlog", response_model=list[BacklogOut], dependencies=[Depends(require("backlog:read"))])
