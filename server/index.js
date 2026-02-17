@@ -131,7 +131,7 @@ if (process.env.NODE_ENV === 'production') {
 
   // SPA Fallback: Any route not handled by API returns index.html
   app.get('*', (req, res, next) => {
-    if (req.url.startsWith('/api')) return next();
+    if (req.url.startsWith('/api/')) return next();
     res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
