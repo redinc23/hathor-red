@@ -85,11 +85,6 @@ app.use(requestLogger);
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
-// Serve React app in production
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'client', 'build')));
-}
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);
@@ -129,10 +124,15 @@ app.get('/api/health', async (req, res) => {
   res.status(health.status === 'ok' ? 200 : 503).json(health);
 });
 
-// Serve React app for any other route in production
+// Serve React App (Static)
 if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'client', 'build', 'index.html'));
+  const clientBuildPath = path.join(__dirname, '../client/build');
+  app.use(express.static(clientBuildPath));
+
+  // SPA Fallback: Any route not handled by API returns index.html
+  app.get('*', (req, res, next) => {
+    if (req.url.startsWith('/api')) return next();
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
   });
 }
 
