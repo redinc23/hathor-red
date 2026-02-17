@@ -20,12 +20,13 @@
 | 4.0 | Feb 17, 2026 | Engineering | Airtight revamp: 25-step lifecycle, risk register, traceability, runbooks |
 | 4.1 | Feb 17, 2026 | Engineering | Google-first mandate; operational automations (PR staleness, nudges); no 3rd party where Google suffices |
 | 4.2 | Feb 17, 2026 | Engineering | Research phase (NotebookLM, Drive); Prototype phase; mandatory Cloud Build per repo (zero exceptions); continuous improvement; SDLC/bug tracking |
+| 4.3 | Feb 17, 2026 | Engineering | Gap analysis; standardized controls (no secrets, vuln scan, repo template); Looker Studio dashboard; Chat #pipeline; 3rd party pressure audit |
 
 ---
 
 ## 1. Executive Summary
 
-This BRD defines an airtight, deterministic, autonomous end-to-end product lifecycle architecture for managing product development pipelines in **Google Workspace and GCP exclusively**. The system enforces a **25+ step state machine** from ideation through **research (NotebookLM, Drive), prototype, code, fullstack, features, repos, bugs, launches, and continuous improvement forever**. **Mandatory triggers:** Every repo gets Cloud Build on creation—no repo without deploy. No "forgot to wire Cloud Build." Research triggers on approval; prototype triggers on research complete; deploy on merge to main. SDLC, debugging, project management—all automated. **Google-first mandate:** Forms, Sheets, Docs, Drive, Gmail, Chat, Apps Script, Workflows, Cloud Functions, Pub/Sub, Vertex AI, NotebookLM, Firestore, BigQuery, Cloud Build, Cloud Source Repositories—at every step. Operational automations (PR staleness, build-failure alerts, approval nudges) ensure nothing dies on the vine. Third-party tools only when Google has no equivalent. Ready for immediate funding and execution.
+This BRD defines an airtight, deterministic, autonomous end-to-end product lifecycle architecture for managing product development pipelines in **Google Workspace and GCP exclusively**. The system enforces a **25+ step state machine** from ideation through **research (NotebookLM, Drive), prototype, code, fullstack, features, repos, bugs, launches, and continuous improvement forever**. **Mandatory triggers:** Every repo gets Cloud Build on creation—no repo without deploy. No "forgot to wire Cloud Build." Research triggers on approval; prototype triggers on research complete; deploy on merge to main. SDLC, debugging, project management—all automated. **Google-first mandate:** Forms, Sheets, Docs, Drive, Gmail, Chat, Apps Script, Workflows, Cloud Functions, Pub/Sub, Vertex AI, NotebookLM, Firestore, BigQuery, Cloud Build, Cloud Source Repositories—at every step. Operational automations (PR staleness, build-failure alerts, approval nudges) ensure nothing dies on the vine. Third-party tools only when Google has no equivalent. **Vision:** One day an idea → 4 days white paper (NotebookLM + Vertex AI) → 4 weeks US competitor (mandatory Cloud Build, no manual deploy, Looker Studio + Chat visibility). Prep now, prosper forever. Ready for immediate funding and execution.
 
 ---
 
@@ -61,6 +62,8 @@ The paradigm shift toward microservices and event-driven architectures in 2025-2
 | **Resilience** | Multi-regional (us-central1/us-east1) active-active; CAP-AP for availability |
 | **Operational Automations** | PR staleness, approval nudges, build-failure alerts, research-folder creation, bug triage, deploy-on-merge (all via Workspace + GCP) |
 | **SDLC / Project Management** | Sheets (sprints, backlog); Cloud Source Repos Issues (bugs); Cloud Build (CI/CD); no manual deploy |
+| **Visualization** | **Looker Studio** (pipeline dashboard); **Google Chat** #pipeline (build/deploy feed); Sheets (status export) |
+| **Standardized Controls** | Repo template; no secrets in code; vuln scan; deploy only from main; branch protection |
 
 ### 3.2 Out-of-Scope
 
@@ -141,12 +144,43 @@ Each step is a discrete state transition with defined inputs, outputs, success c
 | **Deploy on merge to main** | Merge event | Auto-deploy to prod/staging | Cloud Build trigger |
 | **Research folder creation** | Approval | Drive folder + NotebookLM | Pub/Sub → Function |
 | **Bug/issue creation → triage** | Issue created | Sheet row or Chat | Cloud Source Repos webhook or Form |
+| **Build/deploy → Chat #pipeline** | Build start/success/fail, deploy | Chat message with link | Cloud Build webhook → Pub/Sub → Function |
+| **Build/deploy → BigQuery** | Build/deploy event | BigQuery row | Function writes; Looker Studio reads |
+| **Research nudge (7 days)** | RESEARCH_STARTED + 7 days | Chat + Gmail | Cloud Scheduler → Function |
 
 **Rule:** A repo that cannot deploy is a failed provision. Roll back. Fix. No exceptions.
 
 **Research phase tools (fast, efficient):** NotebookLM (corpus from brief + Drive docs); Drive folder per project; Docs for notes; Chat notification with links. Trigger: approval. No waiting.
 
 **SDLC / Debugging:** Cloud Source Repos Issues for bugs; Sheet for triage/backlog; Cloud Build runs on every push/PR; deploy on merge to main. No manual deploy. No "repos not deploying because we didn't use Cloud Build properly."
+
+### 5.2a Standardized Controls (Mistakes We Wouldn't Make — Every Repo)
+
+**Built in. No thinking 24/7. Run the business.**
+
+| Control | Enforcement |
+|---------|-------------|
+| No secrets in code | Cloud Build step: secret scan. Block merge if found. |
+| .gitignore (.env, keys) | Repo template. Heavy Lifter clones template. |
+| cloudbuild.yaml from org template | Same for all 48. No snowflakes. |
+| Deploy only from main | Trigger: branch = main. No other branch to prod. |
+| Dependency vuln scan | Cloud Build step. Block deploy if critical. |
+| Branch protection | No force push to main. PR required. |
+| docs/rollback.md | In template. Every repo has it. |
+
+**Repo template:** `org/repo-template` in Cloud Source Repos or Shared Drive. Heavy Lifter copies it. One source of truth.
+
+### 5.2b Visualization: Where Is the Build? When Is It Going Up?
+
+**Me and the devs need a visual. No fire drills.**
+
+| View | Tool | What |
+|------|------|------|
+| **Pipeline dashboard** | **Looker Studio** | 48 tools × status, last build, last deploy, build in progress. Connect to BigQuery. |
+| **Build/deploy feed** | **Google Chat** #pipeline | Every build start/success/fail, every deploy. Real-time. No GCP console needed. |
+| **Status export** | **Sheets** | Rows: tools. Cols: Status, Last Build, Last Deploy. For those who prefer Sheets. |
+
+**Data flow:** Cloud Build → Pub/Sub → Function → BigQuery. Looker Studio + Chat. End-to-end visibility.
 
 ### 5.3 Operational Automations (Parallel to Lifecycle)
 
@@ -162,8 +196,11 @@ These automations run continuously alongside the 25-step flow—ensuring nothing
 | **Intake backlog** | Cloud Scheduler (daily) | Function → BigQuery → **Sheets** | Populate "Ideas in Queue" Sheet for Product Owner |
 | **DLQ triage** | Pub/Sub DLQ message | Cloud Function → **Google Chat** + **Sheets** | Alert ops; log to triage Sheet |
 | **Quota warning** | Cloud Monitoring alert | Alerting Policy → **Gmail** / **Chat** | Notify before Vertex/GCP quota hit |
+| **Research nudge** | 7 days after RESEARCH_STARTED | Cloud Scheduler → Function → **Chat** + **Gmail** | "Research phase 7 days—mark done or extend?" |
+| **Pipeline dashboard** | Build/deploy events | Cloud Build → Pub/Sub → BigQuery → **Looker Studio** | 48 tools, status, last build, last deploy |
+| **Chat #pipeline** | Build start/success/fail, deploy | Cloud Build webhook → **Google Chat** | Real-time feed; no GCP console needed |
 
-**Design principle:** From inception to full-scale global leader for decades—every step uses Google. Simple automations (PR reminders, approval nudges, meeting follow-ups) prevent drift; nothing falls through the cracks.
+**Design principle:** From inception to full-scale global leader for decades—every step uses Google. Simple automations (PR reminders, approval nudges, meeting follow-ups) prevent drift; nothing falls through the cracks. **Visibility:** Looker Studio + Chat. No fire drills. Run the business.
 
 ---
 
@@ -319,6 +356,8 @@ X-Idempotency-Key: <uuid>
 | R6 | Region outage | Low | High | Multi-region; failover to us-east1 |
 | R7 | PII leakage in logs | Medium | Critical | Redaction pipeline; audit before prod |
 | R8 | Repo created without Cloud Build | — | **Zero tolerance** | Heavy Lifter creates repo + triggers atomically; no repo without deploy |
+| R9 | No visibility on builds/deploys | Medium | High | Looker Studio dashboard; Chat #pipeline; Cloud Build → BigQuery |
+| R10 | Secrets/vulns in code | Medium | Critical | Standardized control: Cloud Build secret scan, vuln scan; block merge |
 
 ---
 
@@ -423,6 +462,7 @@ X-Idempotency-Key: <uuid>
 
 ## Appendix B: Referenced Runbooks & Deep Dives
 
+- [Gap Analysis: What Can Go Wrong?](deep-dives/GAP-ANALYSIS-WHAT-CAN-GO-WRONG.md) — Underutilized Google tools; 3rd party pressure; standardized controls; visualization
 - [Steps 1–2 Deep Dive (Intake)](deep-dives/STEPS-01-02-INTAKE-DEEP-DIVE.md) — Form→Pub/Sub→Validation; anti-patterns; failure modes
 - [Incident Response](runbooks/incident-response.md)
 - [Disaster Recovery](runbooks/disaster-recovery.md)
@@ -459,6 +499,7 @@ Architectural decisions (Saga mode, CAP configuration, multi-region) shall be do
 | **API testing** | Cloud Build + custom scripts; Apigee (if enterprise) | Contract tests in CI; Apigee for API management |
 | **IaC** | Terraform + Cloud Build; Security Command Center | Drift detection via Cloud Build; GCP-native security scanning |
 | **Notifications** | Google Chat, Gmail, Sheets | PR reminders; build failures; DLQ alerts; approval nudges |
+| **Dashboards** | **Looker Studio** (free) | Pipeline status; 48 tools; last build/deploy; connect to BigQuery |
 
 **When third-party is acceptable:** Specialized compliance (e.g., SOC 2 automation), advanced APM if Cloud Trace insufficient, or tools with no Google equivalent. Default: stay in the ecosystem.
 
