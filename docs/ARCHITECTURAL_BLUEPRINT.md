@@ -18,12 +18,13 @@
 |---------|------|--------|---------|
 | 3.0 | Feb 17, 2026 | Suran | Initial construction-ready draft |
 | 4.0 | Feb 17, 2026 | Engineering | Airtight revamp: 25-step lifecycle, risk register, traceability, runbooks |
+| 4.1 | Feb 17, 2026 | Engineering | Google-first mandate; operational automations (PR staleness, nudges); no 3rd party where Google suffices |
 
 ---
 
 ## 1. Executive Summary
 
-This BRD defines an airtight, deterministic, autonomous end-to-end product lifecycle architecture for managing product development pipelines in Google Workspace and GCP. The system enforces a **25-step state machine** from ideation to archival, eliminating manual overhead through serverless orchestration, AI-driven artifact generation, and self-healing mechanisms. It aligns technological choices with business objectives, ensuring scalability to 500+ concurrent projects, 99.99% availability, and immutable auditability for decades of operation. By integrating Saga patterns for distributed transactions, C4 model for structural abstraction, and the five pillars of observability, the architecture mitigates distributed complexity while accelerating time-to-market by 70%. This blueprint serves as the single source of truth, with full traceability from requirements to implementation, ready for immediate funding and execution.
+This BRD defines an airtight, deterministic, autonomous end-to-end product lifecycle architecture for managing product development pipelines in **Google Workspace and GCP exclusively**. The system enforces a **25-step state machine** from ideation to archival—and scales to global leadership for decades—eliminating manual overhead through serverless orchestration, AI-driven artifact generation, and self-healing mechanisms. **Google-first mandate:** Forms, Sheets, Docs, Drive, Gmail, Chat, Apps Script, Workflows, Cloud Functions, Pub/Sub, Vertex AI, Firestore, BigQuery, Cloud Build, Cloud Source Repositories—at every step. Operational automations (PR staleness reminders, approval nudges, DLQ alerts) ensure nothing dies on the vine. It aligns technological choices with business objectives, ensuring scalability to 500+ concurrent projects, 99.99% availability, and immutable auditability. Third-party tools only when Google has no equivalent. Ready for immediate funding and execution.
 
 ---
 
@@ -40,7 +41,7 @@ The paradigm shift toward microservices and event-driven architectures in 2025-2
 5. **Scalability and Speed:** Support 500+ projects with P95 latency <5s for UI actions.
 6. **Cost Efficiency:** Target <$1,000/month at scale, with ROI from 80% ops reduction in Month 1.
 
-**Assumptions and Constraints:** All users on Google Workspace Enterprise Plus; GCP billing enabled. Regulatory compliance (GDPR/HIPAA) via data residency in nam5 multi-region. No third-party integrations beyond webhooks; greenfield Phase 1 only.
+**Assumptions and Constraints:** All users on Google Workspace Enterprise Plus; GCP billing enabled. Regulatory compliance (GDPR/HIPAA) via data residency in nam5 multi-region. **Google-first mandate:** All tools, automations, and workflows use Google Workspace + GCP exclusively where feasible; third-party only when no Google equivalent exists. Greenfield Phase 1 only.
 
 ---
 
@@ -48,19 +49,20 @@ The paradigm shift toward microservices and event-driven architectures in 2025-2
 
 ### 3.1 In-Scope
 
-| Layer | Components |
-|-------|------------|
-| **Interface** | Google Forms/Sheets/Docs for intake and UI; Apps Script for triggers |
-| **Orchestration** | Cloud Functions (Gen2), Pub/Sub, Cloud Tasks, Saga pattern (orchestration mode) |
+| Layer | Components (All Google-Native) |
+|-------|------------------------------|
+| **Interface** | Google Forms, Sheets, Docs, Drive, Gmail, Chat; Apps Script for triggers; Google Workflows |
+| **Orchestration** | Cloud Functions (Gen2), Pub/Sub, Cloud Tasks, **Google Workflows**, Saga pattern (orchestration mode) |
 | **Intelligence** | Vertex AI (Gemini) for briefs, code scaffolding, predictive risk analysis |
 | **Persistence** | Firestore (Native Mode, multi-region), BigQuery, Cloud Source Repositories |
 | **Deployment** | Cloud Build, Artifact Registry |
-| **Security & Observability** | IAM (least privilege), Secret Manager, Cloud Monitoring (five pillars) |
+| **Security & Observability** | IAM (least privilege), Secret Manager, Cloud Monitoring, Cloud Trace, Cloud Logging (five pillars) |
 | **Resilience** | Multi-regional (us-central1/us-east1) active-active; CAP-AP for availability |
+| **Operational Automations** | PR staleness reminders, approval nudges, meeting follow-ups, stale project alerts (all via Workspace + GCP) |
 
 ### 3.2 Out-of-Scope
 
-Legacy migration; non-Google tools (e.g., Jira) beyond passthrough; mobile-native apps; custom hardware.
+Legacy migration; non-Google tools (e.g., Jira, PagerDuty, Datadog) unless no Google equivalent; mobile-native apps; custom hardware.
 
 ---
 
@@ -108,6 +110,23 @@ Each step is a discrete state transition with defined inputs, outputs, success c
 | **24** | `STALE_DETECTION` | >14 days inactive | Cloud Scheduler checks activity | Activity metric in BigQuery | N/A |
 | **25** | `ARCHIVED` | Stale confirmed | Move to `/99_ARCHIVED/`; cold storage | Document path updated | Restore from archive |
 
+### 5.1 Operational Automations (Parallel to Lifecycle)
+
+These automations run continuously alongside the 25-step flow—ensuring nothing dies on the vine from inception through global scale.
+
+| Automation | Trigger | Google Tools | Action |
+|------------|---------|--------------|--------|
+| **PR staleness** | Cloud Scheduler (daily) | Cloud Function → Cloud Source Repositories API → **Google Chat** / **Gmail** | List PRs open >3 days; post to Chat space; email assignees; add row to **Sheets** dashboard |
+| **Approval nudge** | Cloud Tasks (48h after STAKEHOLDER_REVIEW) | Pub/Sub → Function → **Gmail API** / **Chat** | Send reminder if no approval/denial |
+| **Build failure alert** | Cloud Build webhook | Pub/Sub → Function → **Google Chat** | Post to #engineering with link to build logs |
+| **Stale project warning** | Cloud Scheduler (weekly) | Function queries Firestore for projects inactive 7–14 days → **Sheets** + **Gmail** | Update "At Risk" Sheet; email project owners |
+| **Meeting follow-up** | Google Calendar event end | **Apps Script** (Calendar trigger) → **Docs** template → **Gmail** | Auto-generate meeting notes template; send to attendees |
+| **Intake backlog** | Cloud Scheduler (daily) | Function → BigQuery → **Sheets** | Populate "Ideas in Queue" Sheet for Product Owner |
+| **DLQ triage** | Pub/Sub DLQ message | Cloud Function → **Google Chat** + **Sheets** | Alert ops; log to triage Sheet |
+| **Quota warning** | Cloud Monitoring alert | Alerting Policy → **Gmail** / **Chat** | Notify before Vertex/GCP quota hit |
+
+**Design principle:** From inception to full-scale global leader for decades—every step uses Google. Simple automations (PR reminders, approval nudges, meeting follow-ups) prevent drift; nothing falls through the cracks.
+
 ---
 
 ## 6. System Overview
@@ -131,15 +150,16 @@ The system is a Saga-orchestrated pipeline treating product development as a dis
 
 ### 7.1 Functional Requirements (Traceability)
 
-| ID | Requirement | Step(s) | Implementation |
-|----|-------------|--------|----------------|
-| FR-01 | Intake via Forms → Pub/Sub | 1 | Apps Script `onFormSubmit` |
-| FR-02 | Approval Saga with compensation | 6–9 | Cloud Function `saga-orchestrator` |
+| ID | Requirement | Step(s) | Implementation (Google-Native) |
+|----|-------------|--------|--------------------------------|
+| FR-01 | Intake via Forms → Pub/Sub | 1 | **Apps Script** `onFormSubmit` → Pub/Sub API |
+| FR-02 | Approval Saga with compensation | 6–9 | Cloud Function `saga-orchestrator`; **Sheets** for approval UI; **Gmail/Chat** for nudges |
 | FR-03 | GCP provisioning (project, VPC, IAM, repo) | 10–13 | Cloud Function `heavy-lifter` |
-| FR-04 | AI artifacts (brief, spec, scaffold) | 4–5, 14–16 | Vertex AI + Firestore |
-| FR-05 | CI/CD validation | 17–18 | Cloud Build triggers |
+| FR-04 | AI artifacts (brief, spec, scaffold) | 4–5, 14–16 | Vertex AI + Firestore; **Docs** templates |
+| FR-05 | CI/CD validation | 17–18 | Cloud Build triggers; **Chat** on failure |
 | FR-06 | Release pivot (irreversible) | 21 | Saga pivot; manual rollback only |
 | FR-07 | Archival on staleness | 24–25 | Cloud Scheduler + Firestore update |
+| FR-08 | PR staleness prevention | Parallel | Cloud Scheduler → Function → Cloud Source Repos API → **Chat/Gmail/Sheets** |
 
 ### 7.2 Non-Functional Requirements
 
@@ -150,7 +170,7 @@ The system is a Saga-orchestrated pipeline treating product development as a dis
 | **Availability** | 99.99% | Active-active; 1-(1-A)(1-B) for parallel |
 | **Reliability** | Saga compensations | Compensable, pivot, retryable steps |
 | **Security** | Zero trust | TLS, AES, IAM, PII redaction |
-| **Observability** | Five pillars | Freshness, Distribution, Volume, Schema, Lineage (OpenTelemetry) |
+| **Observability** | Five pillars | Cloud Monitoring, Trace, Logging; Freshness, Distribution, Volume, Schema, Lineage |
 
 ---
 
@@ -159,7 +179,7 @@ The system is a Saga-orchestrated pipeline treating product development as a dis
 - **Hybrid Modeling:** C4 (high-level) + UML sequences (Saga flows)
 - **Saga Pattern:** Orchestration mode (central coordinator) for 25 steps; choreography for simple events
 - **CAP:** AP for Firestore (availability); CP for BigQuery (audits)
-- **Diagrams as Code:** Mermaid/Structurizr; version-controlled in Git
+- **Diagrams as Code:** Mermaid in **Google Docs** (Markdown) or **Google Drawings**; version-controlled in Cloud Source Repositories
 
 ---
 
@@ -240,8 +260,9 @@ X-Idempotency-Key: <uuid>
 ### 10.3 Operational Strategy
 
 - **Cold Boot:** Cloud Scheduler pings Functions every 5 min to avoid cold start on first request
-- **Dead-Letter Queue:** Failed messages → `intake-ideas-dlq`; alert after 10 failures
+- **Dead-Letter Queue:** Failed messages → `intake-ideas-dlq`; **Google Chat** alert after 10 failures
 - **Idempotency:** All write operations accept `X-Idempotency-Key`; 24h deduplication
+- **PR Staleness:** Cloud Scheduler → Cloud Function queries Cloud Source Repositories for open PRs >3 days → **Google Chat** + **Gmail** + **Sheets**; no PR dies on the vine
 
 ---
 
@@ -352,6 +373,7 @@ X-Idempotency-Key: <uuid>
 | R-CICD | 17–20 | TC-005: Build fail → block |
 | R-Release | 21–23 | TC-006: Deploy → rollback |
 | R-Archival | 24–25 | TC-007: Stale → archive |
+| R-PR-Staleness | Parallel | TC-008: PR >3 days → Chat/Gmail/Sheets alert |
 
 ---
 
@@ -372,21 +394,29 @@ Architectural decisions (Saga mode, CAP configuration, multi-region) shall be do
 
 ---
 
-## Appendix D: Recommended Tools for Gap Coverage
+## Appendix D: Google-Native Tool Stack (No Third-Party Where Possible)
 
-If additional rigor or automation is desired beyond this document, consider:
+**Mandate:** Use Google Workspace + GCP at every step. Add third-party only when Google has no equivalent.
 
-| Gap Area | Paid Tool | Purpose |
-|----------|-----------|---------|
-| **Architecture diagrams** | Structurizr, Lucidchart, Miro | C4/DFD generation, collaboration, version control |
-| **API contract testing** | Pact, Postman, Stoplight | Contract-first validation, mock generation |
-| **Traceability & compliance** | Jama Connect, IBM DOORS, Valispace | Requirements → design → test traceability; audit trails |
-| **Runbook automation** | PagerDuty, Opsgenie, FireHydrant | Incident response automation, postmortem templates |
-| **Observability** | Datadog, New Relic, Dynatrace | Five pillars (Freshness, Distribution, Volume, Schema, Lineage) |
-| **IaC validation** | Terraform Cloud, Snyk IaC, Checkov | Terraform drift detection, security scanning |
+| Capability | Google Tool | Usage |
+|------------|-------------|-------|
+| **Intake & UI** | Google Forms, Sheets, Docs, Drive | Ideation forms; approval dashboards; brief templates |
+| **Automation glue** | Apps Script, Google Workflows | Form→Pub/Sub; Sheet triggers; approval webhooks; multi-step flows |
+| **Orchestration** | Cloud Functions, Pub/Sub, Cloud Tasks, Google Workflows | Saga coordinator; event routing; retries; long-running workflows |
+| **AI** | Vertex AI (Gemini) | Briefs, specs, scaffold, PR review, risk analysis |
+| **Persistence** | Firestore, BigQuery, Cloud Storage | State; audit logs; cold archive |
+| **Source control** | Cloud Source Repositories | Git; PR triggers; webhooks |
+| **CI/CD** | Cloud Build, Artifact Registry | Build, test, deploy; container registry |
+| **Observability** | Cloud Monitoring, Cloud Trace, Cloud Logging, Log Explorer | Five pillars; SLOs; distributed tracing |
+| **Alerting** | Cloud Monitoring → Gmail, Google Chat | No PagerDuty; use Chat spaces + Gmail for incidents |
+| **Diagrams** | Mermaid in Docs, Google Drawings, Draw.io (Drive) | C4/DFD; version in Cloud Source Repos |
+| **Traceability** | Sheets + Apps Script + Firestore | Requirements→steps→tests; no Jama/DOORS |
+| **API testing** | Cloud Build + custom scripts; Apigee (if enterprise) | Contract tests in CI; Apigee for API management |
+| **IaC** | Terraform + Cloud Build; Security Command Center | Drift detection via Cloud Build; GCP-native security scanning |
+| **Notifications** | Google Chat, Gmail, Sheets | PR reminders; build failures; DLQ alerts; approval nudges |
 
-*These are optional; the blueprint is self-contained and executable without them.*
+**When third-party is acceptable:** Specialized compliance (e.g., SOC 2 automation), advanced APM if Cloud Trace insufficient, or tools with no Google equivalent. Default: stay in the ecosystem.
 
 ---
 
-*End of Document. This blueprint is the amalgamated, top-down assembly line—airtight and ready for execution.*
+*End of Document. This blueprint is the amalgamated, top-down assembly line—airtight, Google-native, and ready for execution.*
