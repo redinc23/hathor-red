@@ -235,6 +235,25 @@ npm run client
 npm run build
 ```
 
+
+### Ops Toolbox (GCP/Terraform)
+
+```bash
+# Build a local operator container with gcloud + terraform
+make toolbox
+
+# Open a shell inside the toolbox container
+make toolbox-shell
+
+# Generate (or scaffold) GCP inventory
+make inventory
+
+# Run terraform apply (defaults to TF_DIR=infra)
+make terraform-apply
+```
+
+Scripts degrade gracefully when `gcloud` or `terraform` are missing and print next-step guidance.
+
 ### Environment Variables
 
 See `.env.example` for all available configuration options.
