@@ -1,0 +1,29 @@
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hathor-red:$COMMIT_SHA', '.']
+
+  # Push image to GCR
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/hathor-red:$COMMIT_SHA']
+
+  # Deploy to Cloud Run (Production)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'hathor-red-prod'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/hathor-red:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+
+images:
+  - 'gcr.io/$PROJECT_ID/hathor-red:$COMMIT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
