@@ -1,35 +1,38 @@
 steps:
-  - name: 'node:20'
+  - name: 'node:18'
     id: 'install'
     entrypoint: bash
-    args: ['-c', 'set -euo pipefail; npm ci || npm install']
+    args: ['-c', 'set -euo pipefail; npm install -g pnpm@8.9.0 && pnpm install --frozen-lockfile']
 
-  - name: 'node:20'
+  - name: 'node:18'
     id: 'lint (if present)'
     entrypoint: bash
     args:
       - -c
       - |
         set -euo pipefail
-        node -e "process.exit(require('./package.json').scripts?.lint?0:1)" || exit 0
-        npm run lint
+        npm install -g pnpm@8.9.0
+        node -e "process.exit(require('./package.json').scripts?.['lint:ci']?0:1)" || exit 0
+        pnpm run lint:ci
 
-  - name: 'node:20'
+  - name: 'node:18'
     id: 'test (if present)'
     entrypoint: bash
     args:
       - -c
       - |
         set -euo pipefail
+        npm install -g pnpm@8.9.0
         node -e "process.exit(require('./package.json').scripts?.test?0:1)" || exit 0
-        npm test
+        pnpm test
 
-  - name: 'node:20'
+  - name: 'node:18'
     id: 'build (if present)'
     entrypoint: bash
     args:
       - -c
       - |
         set -euo pipefail
+        npm install -g pnpm@8.9.0
         node -e "process.exit(require('./package.json').scripts?.build?0:1)" || exit 0
-        npm run build
+        pnpm run build
