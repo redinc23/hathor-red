@@ -108,7 +108,7 @@ export const chatWithAI = async (message, conversationHistory = [], currentPage 
   return response.data;
 };
 
-export default {
+const aiService = {
   getAIStatus,
   generateAIPlaylist,
   getRecommendations,
@@ -118,3 +118,5 @@ export default {
   semanticSearch,
   chatWithAI
 };
+
+export default aiService;
