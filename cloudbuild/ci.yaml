@@ -1,0 +1,12 @@
+# Canonical PR validation pipeline
+steps:
+  - name: 'gcr.io/cloud-builders/npm'
+    entrypoint: bash
+    args:
+      - -lc
+      - |
+        npm ci
+        npm run lint --if-present
+        npm test --if-present
+options:
+  logging: CLOUD_LOGGING_ONLY

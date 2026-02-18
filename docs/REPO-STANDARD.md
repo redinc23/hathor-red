@@ -128,3 +128,17 @@ When creating a new repo:
 ---
 
 *This standard applies to all repos. $20M company. Millions of revamps. Problems before they happen.*
+
+---
+
+## 10. Canonical Cloud Build + Admin IAM Defaults
+
+| Item | Required Value |
+|------|----------------|
+| PR trigger config | `cloudbuild/ci.yaml` |
+| `develop` trigger config | `cloudbuild/cd.stg.yaml` |
+| `main` trigger config | `cloudbuild/cd.prod.yaml` |
+| Cloud Run admin invoker member | `group:admins@mangu-platforms.com` |
+
+**Rule:** No user-scoped admin invoker (`user:...`) and no public invoker (`allUsers`) on admin services.
+

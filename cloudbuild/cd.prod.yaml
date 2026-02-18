@@ -1,0 +1,18 @@
+# Canonical main->production deployment pipeline
+substitutions:
+  _SERVICE_NAME: hathor-red-admin-prod
+  _REGION: us-central1
+  _ADMIN_MEMBER: group:admins@mangu-platforms.com
+
+steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: bash
+    args:
+      - -lc
+      - |
+        gcloud run services add-iam-policy-binding "${_SERVICE_NAME}" \
+          --region="${_REGION}" \
+          --member="${_ADMIN_MEMBER}" \
+          --role="roles/run.invoker"
+options:
+  logging: CLOUD_LOGGING_ONLY
