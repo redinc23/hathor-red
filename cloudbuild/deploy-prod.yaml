@@ -1,0 +1,33 @@
+# main -> production deployment.
+substitutions:
+  _REGION: "us-central1"
+  _SERVICE_PUBLIC: "hathor-red-public-prod"
+  _SERVICE_ADMIN: "hathor-red-admin-prod"
+  _ADMIN_INVOKER: "user:renee@mangu-publishers.com"
+steps:
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    args:
+      - "-lc"
+      - |
+        set -euo pipefail
+        gcloud config set run/region "${_REGION}"
+
+        echo "Deploy public prod service..."
+        gcloud run deploy "${_SERVICE_PUBLIC}" --source . --quiet
+
+        echo "Deploy admin prod service..."
+        gcloud run deploy "${_SERVICE_ADMIN}" --source . --quiet
+
+        echo "Public prod: allow allUsers invoker (public web)."
+        gcloud run services add-iam-policy-binding "${_SERVICE_PUBLIC}" \
+          --member="allUsers" --role="roles/run.invoker" --region "${_REGION}" --quiet
+
+        echo "Admin prod: remove allUsers invoker + grant invoker to ${_ADMIN_INVOKER}."
+        gcloud run services remove-iam-policy-binding "${_SERVICE_ADMIN}" \
+          --member="allUsers" --role="roles/run.invoker" --region "${_REGION}" --quiet || true
+
+        gcloud run services add-iam-policy-binding "${_SERVICE_ADMIN}" \
+          --member="${_ADMIN_INVOKER}" --role="roles/run.invoker" --region "${_REGION}" --quiet
+options:
+  logging: CLOUD_LOGGING_ONLY
