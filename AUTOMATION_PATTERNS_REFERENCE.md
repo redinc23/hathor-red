@@ -270,7 +270,15 @@ jobs:
               check => check.conclusion === 'success'
             );
 
-            if (allPassed && pr.approved_reviews_count >= 2) {
+            // Get approved reviews count
+            const { data: reviews } = await github.rest.pulls.listReviews({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number
+            });
+            const approvedCount = reviews.filter(r => r.state === 'APPROVED').length;
+
+            if (allPassed && approvedCount >= 2) {
               // Auto merge
               await github.rest.pulls.merge({
                 owner: context.repo.owner,
@@ -711,13 +719,17 @@ BEGIN
   VALUES (
     TG_TABLE_NAME,
     TG_OP,
-    CURRENT_USER_ID(),
+    NULLIF(current_setting('app.user_id', true), '')::INTEGER,
     row_to_json(OLD),
     row_to_json(NEW)
   );
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Note: Set user_id before operations using:
+-- SET LOCAL app.user_id = '123';
+-- Or use application-level context to set the user ID
 
 -- Attach to tables
 CREATE TRIGGER users_audit AFTER INSERT OR UPDATE OR DELETE ON users

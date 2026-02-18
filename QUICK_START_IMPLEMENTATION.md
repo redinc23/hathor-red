@@ -73,7 +73,12 @@ jobs:
       - name: Analyze commits
         id: analyze
         run: |
-          commits=$(git log origin/main..HEAD --pretty=format:%B)
+          BASE_REF="${GITHUB_BASE_REF:-main}"
+          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+            commits=$(git log "origin/$BASE_REF"..HEAD --pretty=format:%B)
+          else
+            commits=$(git log --pretty=format:%B)
+          fi
 
           if echo "$commits" | grep -q "^feat:"; then
             echo "has_feature=true" >> $GITHUB_OUTPUT
@@ -91,9 +96,16 @@ jobs:
       - name: Check file changes
         id: files
         run: |
-          git diff origin/main HEAD --name-only | grep -q "package.json" && echo "has_deps=true" >> $GITHUB_OUTPUT || true
-          git diff origin/main HEAD --name-only | grep -q "database/" && echo "has_db=true" >> $GITHUB_OUTPUT || true
-          git diff origin/main HEAD --name-only | grep -q "server/middleware/auth" && echo "has_security=true" >> $GITHUB_OUTPUT || true
+          BASE_REF="${GITHUB_BASE_REF:-main}"
+          if git rev-parse --verify "origin/$BASE_REF" >/dev/null 2>&1; then
+            git diff "origin/$BASE_REF" HEAD --name-only | grep -q "package.json" && echo "has_deps=true" >> $GITHUB_OUTPUT || true
+            git diff "origin/$BASE_REF" HEAD --name-only | grep -q "database/" && echo "has_db=true" >> $GITHUB_OUTPUT || true
+            git diff "origin/$BASE_REF" HEAD --name-only | grep -q "server/middleware/auth" && echo "has_security=true" >> $GITHUB_OUTPUT || true
+          else
+            git diff --name-only | grep -q "package.json" && echo "has_deps=true" >> $GITHUB_OUTPUT || true
+            git diff --name-only | grep -q "database/" && echo "has_db=true" >> $GITHUB_OUTPUT || true
+            git diff --name-only | grep -q "server/middleware/auth" && echo "has_security=true" >> $GITHUB_OUTPUT || true
+          fi
 
       - name: Apply labels
         uses: actions/github-script@v7
@@ -156,25 +168,59 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const codeowners = fs.readFileSync('.github/CODEOWNERS', 'utf8');
+            const path = require('path');
+            
+            // Check if CODEOWNERS file exists
+            const codeownersPath = '.github/CODEOWNERS';
+            if (!fs.existsSync(codeownersPath)) {
+              console.log('CODEOWNERS file not found, skipping reviewer assignment');
+              return;
+            }
+            
+            const codeowners = fs.readFileSync(codeownersPath, 'utf8');
+            const changedFiles = context.payload.pull_request.changed_files 
+              ? await github.rest.pulls.listFiles({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: context.issue.number
+                })
+              : { data: [] };
 
-            // Parse CODEOWNERS and extract reviewer teams
-            const reviewers = [];
+            // Parse CODEOWNERS and extract reviewer teams based on changed files
+            const reviewers = new Set();
+            const filePaths = changedFiles.data.map(f => f.filename);
+            
             codeowners.split('\n').forEach(line => {
-              if (line.startsWith('*')) {
-                const parts = line.split(/\s+/);
-                if (parts.length > 1) {
-                  const reviewer = parts[parts.length - 1].replace('@', '');
-                  if (!reviewers.includes(reviewer)) {
-                    reviewers.push(reviewer);
-                  }
+              // Skip comments and empty lines
+              const trimmed = line.trim();
+              if (!trimmed || trimmed.startsWith('#')) return;
+              
+              const parts = trimmed.split(/\s+/);
+              if (parts.length < 2) return;
+              
+              const pattern = parts[0];
+              const owners = parts.slice(1).filter(p => p.startsWith('@'));
+              
+              // Check if pattern matches any changed file
+              const matches = filePaths.some(filePath => {
+                if (pattern === '*') return true;
+                if (pattern.startsWith('/')) {
+                  return filePath.startsWith(pattern.slice(1));
                 }
+                return filePath.includes(pattern);
+              });
+              
+              if (matches) {
+                owners.forEach(owner => {
+                  reviewers.add(owner.replace('@', ''));
+                });
               }
             });
 
-            if (reviewers.length > 0) {
+            const reviewersArray = Array.from(reviewers);
+            if (reviewersArray.length > 0) {
               // Pick random reviewers
-              const selected = reviewers.sort(() => 0.5 - Math.random()).slice(0, 2);
+              const selected = reviewersArray.sort(() => 0.5 - Math.random()).slice(0, 2);
               await github.rest.pulls.requestReviewers({
                 pull_number: context.issue.number,
                 owner: context.repo.owner,
@@ -320,13 +366,13 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
 
       - name: Run backup
         env:
@@ -403,7 +449,12 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('./coverage/coverage-summary.json', 'utf8'));
+            const path = './coverage/coverage-summary.json';
+            if (!fs.existsSync(path)) {
+              console.log('Coverage file not found, skipping PR comment');
+              return;
+            }
+            const coverage = JSON.parse(fs.readFileSync(path, 'utf8'));
             const total = coverage.total;
 
             const comment = `## 📊 Coverage Report
@@ -469,6 +520,7 @@ router.get('/api/health', async (req, res) => {
         responseTime: Date.now() - startTime
       };
       await pool.end();
+      // Note: For production, reuse a single pool instance instead of creating new ones
     } catch (error) {
       health.components.database = {
         status: 'down',
@@ -480,6 +532,7 @@ router.get('/api/health', async (req, res) => {
     // Check Redis
     try {
       const redisClient = redis.createClient({ url: process.env.REDIS_URL });
+      await redisClient.connect();
       await redisClient.ping();
       health.components.redis = { status: 'up' };
       await redisClient.quit();
@@ -597,7 +650,7 @@ After implementing each item:
 # Commit changes
 git add .
 git commit -m "feat: add automation - [item name]"
-git push origin claude/analyze-automation-opportunities-SZfAv
+git push origin your-branch-name
 
 # Create PR and verify workflow runs
 # Check GitHub Actions tab for status

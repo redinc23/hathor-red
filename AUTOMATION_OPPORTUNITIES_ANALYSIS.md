@@ -267,17 +267,21 @@ jobs:
 
 ```yaml
 # Trigger: Automated dependency updates
-name: Dependency Updates
-on:
-  schedule:
-    - cron: '0 2 * * 1'  # Weekly Monday 2 AM
-jobs:
-  create-dependency-prs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: dependabot/fetch-metadata@v1
-      - name: Create update PRs
-        run: npm update --save
+# Note: Use Dependabot configuration (.github/dependabot.yml) instead
+# This example shows how to configure Dependabot for automated PRs
+# name: Dependency Updates
+# on:
+#   schedule:
+#     - cron: '0 2 * * 1'  # Weekly Monday 2 AM
+# jobs:
+#   create-dependency-prs:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - uses: actions/setup-node@v3
+#       - name: Check for updates
+#         run: npm outdated || true
+#       # Dependabot handles PR creation automatically via .github/dependabot.yml
 ```
 
 ### 2.3 External Event Triggers
