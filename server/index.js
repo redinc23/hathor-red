@@ -153,7 +153,7 @@ setupSocketHandlers(io);
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production'
+    error: process.env.NODE_ENV === 'production' && process.env.DEPLOY_ENV !== 'staging'
       ? 'Internal server error'
       : err.message
   });

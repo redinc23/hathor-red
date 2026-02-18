@@ -37,7 +37,7 @@ steps:
           --platform=managed \
           --image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}" \
           --port=5000 \
-          --set-env-vars=NODE_ENV=production
+          --set-env-vars=NODE_ENV=production,DEPLOY_ENV=staging
 
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}'
