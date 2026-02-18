@@ -107,9 +107,9 @@ if [[ -n "$TAG" ]]; then
     -H "$AUTH_HEADER" \
     -H "$ACCEPT_HEADER" \
     "${API_BASE}/issues/${PR_NUMBER}/labels" \
-    -d "{\"labels\":[\"${TAG}\"]}")
+    -d "$(jq -n --arg tag "$TAG" '{"labels":[$tag]}')")
 
-  has_label=$(echo "$label_response" | jq -r --arg TAG "$TAG" 'map(.name) | index($TAG) != null')
+  has_label=$(echo "$label_response" | jq -r --arg TAG "$TAG" 'try (map(.name) | index($TAG) != null) catch false')
   if [[ "$has_label" != "true" ]]; then
     echo "Failed to add label '${TAG}' to PR #${PR_NUMBER}." >&2
     echo "$label_response" | jq -r '.message // .'
