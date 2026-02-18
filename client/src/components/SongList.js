@@ -11,10 +11,6 @@ const SongList = () => {
 
   const { playSong, currentSong } = usePlayer();
 
-  useEffect(() => {
-    loadSongs();
-  }, [search, selectedGenre]);
-
   const loadSongs = async () => {
     try {
       setLoading(true);
@@ -26,6 +22,11 @@ const SongList = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadSongs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, selectedGenre]);
 
   const handlePlay = (song) => {
     playSong(song);

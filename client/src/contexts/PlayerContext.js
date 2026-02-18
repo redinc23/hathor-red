@@ -28,7 +28,6 @@ export const PlayerProvider = ({ children }) => {
 
   const audioRef = useRef(null);
   const audioContextRef = useRef(null);
-  const sourceNodeRef = useRef(null);
 
   useEffect(() => {
     // Initialize Web Audio API
