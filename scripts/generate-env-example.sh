@@ -5,11 +5,11 @@ ENV_CONTEXT="${1:-stg}"
 
 case "$ENV_CONTEXT" in
   stg)
-    FIRESTORE_PROJECT_ID="encoded-shape-487615-b1"
+    FIRESTORE_PROJECT_ID="your-gcp-project-id"
     API_BASE_URL="https://hathor-red-public-stg-<hash>-uc.a.run.app"
     ;;
   prod)
-    FIRESTORE_PROJECT_ID="encoded-shape-487615-b1"
+    FIRESTORE_PROJECT_ID="your-gcp-project-id"
     API_BASE_URL="https://hathor-red-public-prod-<hash>-uc.a.run.app"
     ;;
   *)

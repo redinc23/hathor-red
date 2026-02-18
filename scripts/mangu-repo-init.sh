@@ -20,7 +20,11 @@ WITH_SERVICE_SKELETON="false"
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --target)
-      TARGET_DIR="${2:-}"
+      if [[ $# -lt 2 ]]; then
+        echo "Target directory cannot be empty." >&2
+        exit 1
+      fi
+      TARGET_DIR="${2}"
       shift 2
       ;;
     --with-service-skeleton)
@@ -140,16 +144,16 @@ EOF_CI
 write_if_missing cloudbuild.cd.stg.yaml <<'EOF_STG'
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hathor-red-public-stg:$SHORT_SHA', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hathor-red-stg:$SHORT_SHA', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/hathor-red-public-stg:$SHORT_SHA']
+    args: ['push', 'gcr.io/$PROJECT_ID/hathor-red-stg:$SHORT_SHA']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - run
       - deploy
       - hathor-red-public-stg
-      - --image=gcr.io/$PROJECT_ID/hathor-red-public-stg:$SHORT_SHA
+      - --image=gcr.io/$PROJECT_ID/hathor-red-stg:$SHORT_SHA
       - --region=us-central1
       - --allow-unauthenticated
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -158,7 +162,7 @@ steps:
       - run
       - deploy
       - hathor-red-admin-stg
-      - --image=gcr.io/$PROJECT_ID/hathor-red-public-stg:$SHORT_SHA
+      - --image=gcr.io/$PROJECT_ID/hathor-red-stg:$SHORT_SHA
       - --region=us-central1
       - --no-allow-unauthenticated
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -177,22 +181,22 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
-  _ADMIN_MEMBER: user:renee@mangu-publishers.com
+  _ADMIN_MEMBER: user:your-admin@example.com
 EOF_STG
 
 write_if_missing cloudbuild.cd.prod.yaml <<'EOF_PROD'
 steps:
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hathor-red-public-prod:$SHORT_SHA', '.']
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/hathor-red-prod:$SHORT_SHA', '.']
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'gcr.io/$PROJECT_ID/hathor-red-public-prod:$SHORT_SHA']
+    args: ['push', 'gcr.io/$PROJECT_ID/hathor-red-prod:$SHORT_SHA']
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
       - run
       - deploy
       - hathor-red-public-prod
-      - --image=gcr.io/$PROJECT_ID/hathor-red-public-prod:$SHORT_SHA
+      - --image=gcr.io/$PROJECT_ID/hathor-red-prod:$SHORT_SHA
       - --region=us-central1
       - --allow-unauthenticated
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -201,7 +205,7 @@ steps:
       - run
       - deploy
       - hathor-red-admin-prod
-      - --image=gcr.io/$PROJECT_ID/hathor-red-public-prod:$SHORT_SHA
+      - --image=gcr.io/$PROJECT_ID/hathor-red-prod:$SHORT_SHA
       - --region=us-central1
       - --no-allow-unauthenticated
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
@@ -220,7 +224,7 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
 substitutions:
-  _ADMIN_MEMBER: user:renee@mangu-publishers.com
+  _ADMIN_MEMBER: user:your-admin@example.com
 EOF_PROD
 
 append_if_missing_line .dockerignore 'node_modules'
