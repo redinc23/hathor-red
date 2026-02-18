@@ -12,6 +12,7 @@ if [[ -z "${PROJECT_ID}" ]]; then
 fi
 
 failures=0
+verified=0
 
 for svc in "${ADMIN_SERVICES[@]}"; do
   echo "Checking admin IAM hard lock for ${svc}"
@@ -22,16 +23,23 @@ for svc in "${ADMIN_SERVICES[@]}"; do
     continue
   fi
 
-  if echo "${policy}" | rg -q '"allUsers"'; then
+  verified=$((verified + 1))
+
+  if echo "${policy}" | grep -q '"allUsers"'; then
     echo "FAIL: ${svc} grants roles/run.invoker to allUsers (P0 exposure)." >&2
     failures=$((failures + 1))
   fi
 
-  if ! echo "${policy}" | rg -q "${ADMIN_GROUP}"; then
+  if ! echo "${policy}" | grep -Fq "${ADMIN_GROUP}"; then
     echo "FAIL: ${svc} is missing ${ADMIN_GROUP} invoker binding." >&2
     failures=$((failures + 1))
   fi
 done
+
+if (( verified == 0 )); then
+  echo "FAIL: Could not verify any service policies. Security gate cannot pass without verification." >&2
+  exit 1
+fi
 
 if (( failures > 0 )); then
   echo "golden-check failed with ${failures} issue(s)." >&2

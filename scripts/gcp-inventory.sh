@@ -76,8 +76,8 @@ for sa in hathor-red-public-stg-sa hathor-red-admin-stg-sa hathor-red-public-pro
 done
 
 echo "## Crack summary"
-ADMIN_EXPOSURE="$(gcloud run services get-iam-policy hathor-red-admin-prod --project="${PROJECT_ID}" --region="${REGION}" --format='value(bindings.members)' 2>/dev/null | tr ';' '\n' | rg -c '^allUsers$' || true)"
-ADMIN_GROUP_PRESENT="$(gcloud run services get-iam-policy hathor-red-admin-prod --project="${PROJECT_ID}" --region="${REGION}" --format='value(bindings.members)' 2>/dev/null | tr ';' '\n' | rg -c "^${ADMIN_GROUP}$" || true)"
+ADMIN_EXPOSURE="$(gcloud run services get-iam-policy hathor-red-admin-prod --project="${PROJECT_ID}" --region="${REGION}" --format='value(bindings.members)' 2>/dev/null | tr ';' '\n' | grep -c '^allUsers$' || true)"
+ADMIN_GROUP_PRESENT="$(gcloud run services get-iam-policy hathor-red-admin-prod --project="${PROJECT_ID}" --region="${REGION}" --format='value(bindings.members)' 2>/dev/null | tr ';' '\n' | grep -Fc "^${ADMIN_GROUP}$" || true)"
 
 print_summary_line "Admin prod exposed to allUsers" "${ADMIN_EXPOSURE:-0}"
 print_summary_line "Admin prod admin-group invoker" "${ADMIN_GROUP_PRESENT:-0}"
