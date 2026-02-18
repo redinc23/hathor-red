@@ -24,11 +24,13 @@ ADMIN_MEMBER="group:admins@mangu-platforms.com"
 
 for svc in hathor-red-admin-stg hathor-red-admin-prod; do
   gcloud run services remove-iam-policy-binding "$svc" \
+    --project="$PROJECT_ID" \
     --region="$REGION" \
     --member="allUsers" \
     --role="roles/run.invoker" >/dev/null 2>&1 || true
 
   gcloud run services add-iam-policy-binding "$svc" \
+    --project="$PROJECT_ID" \
     --region="$REGION" \
     --member="$ADMIN_MEMBER" \
     --role="roles/run.invoker"
@@ -44,9 +46,12 @@ rg -n "admins@mangu-platforms.com|admin_invoker_members|cloudbuild/(ci|cd\.stg|c
 
 # Live IAM checks
 REGION="us-central1"
+PROJECT_ID="encoded-shape-487615-b1"
 for svc in hathor-red-admin-stg hathor-red-admin-prod; do
   echo "---- $svc invokers"
-  gcloud run services get-iam-policy "$svc" --region="$REGION" \
+  gcloud run services get-iam-policy "$svc" \
+    --project="$PROJECT_ID" \
+    --region="$REGION" \
     --format='table(bindings.role,bindings.members)' | rg 'run.invoker|admins@mangu-platforms.com|allUsers' || true
 done
 ```
