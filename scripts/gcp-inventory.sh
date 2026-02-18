@@ -9,13 +9,11 @@ if ! command -v gcloud >/dev/null 2>&1; then
   exit 127
 fi
 
-gcloud config set project "$PROJECT_ID" >/dev/null
-
 echo "== Cloud Run services (${PROJECT_ID}/${REGION}) =="
-gcloud run services list --region="$REGION"
+gcloud run services list --project="$PROJECT_ID" --region="$REGION"
 
 echo
 echo "== Cloud Build triggers (GA, then beta fallback) =="
-if ! gcloud builds triggers list --region="$REGION" --format="table(name,eventType,filename)"; then
-  gcloud beta builds triggers list --region="$REGION" --format="table(name,eventType,filename)"
+if ! gcloud builds triggers list --project="$PROJECT_ID" --region="$REGION" --format="table(name,eventType,filename)"; then
+  gcloud beta builds triggers list --project="$PROJECT_ID" --region="$REGION" --format="table(name,eventType,filename)"
 fi
