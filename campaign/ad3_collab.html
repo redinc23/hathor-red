@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aether | Collaborate</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #00d4ff;
@@ -40,7 +37,6 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 100px;
-            box-sizing: border-box;
         }
 
         .left-content {
@@ -95,11 +91,6 @@
         @keyframes float {
             0%, 100% { transform: translateY(0) rotate(-5deg); }
             50% { transform: translateY(-20px) rotate(-3deg); }
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
         }
 
         .card-header {
@@ -203,6 +194,17 @@
             transform: scale(1.05);
         }
 
+        .badge-new {
+            background: var(--accent);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
     </style>
 </head>
 <body>
