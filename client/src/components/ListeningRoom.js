@@ -19,6 +19,21 @@ const ListeningRoom = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
 
+  const loadRoom = async () => {
+    try {
+      const data = await musicService.getRoomById(id);
+      setRoom(data.room);
+      setParticipants(data.participants);
+      if (data.room.current_song_id) {
+        loadCurrentSong(data.room.current_song_id);
+      }
+    } catch (error) {
+      console.error('Failed to load room:', error);
+      alert('Room not found');
+      navigate('/rooms');
+    }
+  };
+
   useEffect(() => {
     loadRoom();
     
@@ -81,22 +96,8 @@ const ListeningRoom = () => {
         newSocket.disconnect();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
-
-  const loadRoom = async () => {
-    try {
-      const data = await musicService.getRoomById(id);
-      setRoom(data.room);
-      setParticipants(data.participants);
-      if (data.room.current_song_id) {
-        loadCurrentSong(data.room.current_song_id);
-      }
-    } catch (error) {
-      console.error('Failed to load room:', error);
-      alert('Room not found');
-      navigate('/rooms');
-    }
-  };
 
   const loadCurrentSong = async (songId) => {
     try {
