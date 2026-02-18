@@ -11,6 +11,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.9.0
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -21,7 +26,7 @@ jobs:
         run: pnpm install --frozen-lockfile
       
       - name: Run validation (type-check + lint + test)
-        run: npm run validate
+        run: pnpm run validate
       
       - name: Build check
-        run: npm run build:ci
+        run: pnpm run build:ci
