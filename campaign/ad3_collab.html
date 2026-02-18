@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether | Collaborate</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #764ba2;
+            --accent: #ff1a8c;
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --text: #ffffff;
+            --glass: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .ad-container {
+            width: 1200px;
+            height: 628px;
+            background: linear-gradient(135deg, #121212 0%, #000 100%);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 100px;
+        }
+
+        .left-content {
+            z-index: 2;
+            max-width: 450px;
+        }
+
+        h2 {
+            font-size: 72px;
+            margin: 0 0 20px;
+            line-height: 1;
+            font-weight: 900;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            font-size: 22px;
+            color: #b3b3b3;
+            margin-bottom: 40px;
+            line-height: 1.5;
+        }
+
+        .right-content {
+            position: relative;
+            width: 500px;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Playlist Card Mockup */
+        .playlist-card {
+            width: 320px;
+            background: rgba(30, 30, 30, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px;
+            position: relative;
+            z-index: 5;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            transform: rotate(-5deg);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-5deg); }
+            50% { transform: translateY(-20px) rotate(-3deg); }
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .album-art {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, var(--secondary), var(--accent));
+        }
+
+        .track-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .track {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .avatar-group {
+            position: absolute;
+            bottom: -20px;
+            right: -20px;
+            display: flex;
+            background: #222;
+            padding: 8px;
+            border-radius: 50px;
+            border: 1px solid #444;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #222;
+            margin-left: -12px;
+            background-size: cover;
+        }
+
+        /* Connecting Lines/Nodes */
+        .node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #333;
+            border: 2px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            z-index: 1;
+        }
+
+        .node img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            width: 200px;
+            top: 50%;
+            left: 50%;
+            z-index: 0;
+            opacity: 0.5;
+        }
+
+        .cta-btn {
+            background: #fff;
+            color: #000;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 18px;
+            text-decoration: none;
+            display: inline-block;
+            transition: 0.3s;
+        }
+
+        .cta-btn:hover {
+            background: var(--primary);
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        .badge-new {
+            background: var(--accent);
+            color: white;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-weight: 700;
+            vertical-align: middle;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="ad-container">
+        <div class="left-content">
+            <h2>Vibe <span class="gradient-text">Together</span></h2>
+            <p>Create the ultimate playlist with your friends in real-time. No matter where you are.</p>
+
+            <a href="#" class="cta-btn">Start a Party</a>
+        </div>
+
+        <div class="right-content">
+            <!-- Background nodes -->
+            <div class="node" style="top: 0; left: 50%; animation: pulse 2s infinite;">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="node" style="bottom: 20%; left: 0;">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="node" style="bottom: 10%; right: 10%;">
+                <i class="fas fa-user"></i>
+            </div>
+
+            <!-- Lines -->
+            <div class="line" style="transform: translate(-50%, -50%) rotate(45deg); width: 300px;"></div>
+            <div class="line" style="transform: translate(-50%, -50%) rotate(-45deg); width: 300px;"></div>
+
+            <!-- Central Card -->
+            <div class="playlist-card">
+                <div class="card-header">
+                    <div class="album-art"></div>
+                    <div>
+                        <div style="font-weight: 700;">Road Trip 2024</div>
+                        <div style="font-size: 12px; color: #aaa;">Collaborative Playlist</div>
+                    </div>
+                </div>
+
+                <div class="track-list">
+                    <div class="track">
+                        <div style="width: 30px; height: 30px; background: #444; border-radius: 4px;"></div>
+                        <div style="font-size: 12px;">Blinding Lights - Added by Alex</div>
+                    </div>
+                    <div class="track">
+                        <div style="width: 30px; height: 30px; background: #444; border-radius: 4px;"></div>
+                        <div style="font-size: 12px;">Starboy - Added by Sarah</div>
+                    </div>
+                    <div class="track">
+                        <div style="width: 30px; height: 30px; background: #444; border-radius: 4px;"></div>
+                        <div style="font-size: 12px;">The Hills - Added by Mike</div>
+                    </div>
+                </div>
+
+                <div class="avatar-group">
+                    <div class="avatar" style="background-color: #ff5757;"></div>
+                    <div class="avatar" style="background-color: #57ff57;"></div>
+                    <div class="avatar" style="background-color: #5757ff;"></div>
+                    <div class="avatar" style="background-color: #ffff57; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #000; font-weight: bold;">+3</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
