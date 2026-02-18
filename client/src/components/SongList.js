@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { musicService } from '../services/music';
 import { usePlayer } from '../contexts/PlayerContext';
 import './SongList.css';
@@ -11,11 +11,7 @@ const SongList = () => {
 
   const { playSong, currentSong } = usePlayer();
 
-  useEffect(() => {
-    loadSongs();
-  }, [search, selectedGenre]);
-
-  const loadSongs = async () => {
+  const loadSongs = useCallback(async () => {
     try {
       setLoading(true);
       const data = await musicService.getSongs({ search, genre: selectedGenre });
@@ -25,7 +21,11 @@ const SongList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, selectedGenre]);
+
+  useEffect(() => {
+    loadSongs();
+  }, [loadSongs]);
 
   const handlePlay = (song) => {
     playSong(song);

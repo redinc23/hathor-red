@@ -41,3 +41,6 @@ coverage/
 # Temp files
 tmp/
 temp/
+
+# Build artifacts
+.turbo/

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { chatWithAI, generateAIPlaylist, semanticSearch } from '../services/ai';
+import { chatWithAI } from '../services/ai';
 import { usePlayer } from '../contexts/PlayerContext';
 import './AIChat.css';
 
