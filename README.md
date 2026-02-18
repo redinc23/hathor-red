@@ -163,6 +163,7 @@ hathor-red/
 
 ## 📖 Documentation
 
+- **[Manual (How It Works Now)](docs/MANUAL.md)** - Practical guide for anyone new to the codebase
 - **[Standards Living Document](docs/STANDARDS_LIVING_DOCUMENT.md)** - Rock-hard repeatable standards, AI prompts, juncture controls
 - **[Deploy (Railway/Render)](DEPLOY.md)** - Get live in 15 min
 - **[API Documentation](API.md)** - Complete REST API and WebSocket reference
