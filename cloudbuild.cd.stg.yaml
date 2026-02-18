@@ -5,6 +5,7 @@ substitutions:
   _REGION: us-central1
   _REPOSITORY: hathor-red
   _SERVICE: hathor-red-staging
+  _RUNTIME_SA: tool-stg-sa
 
 steps:
   - name: 'gcr.io/cloud-builders/docker'
@@ -28,6 +29,7 @@ steps:
       - '--image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$SHORT_SHA'
       - '--region=${_REGION}'
       - '--platform=managed'
+      - '--service-account=${_RUNTIME_SA}@$PROJECT_ID.iam.gserviceaccount.com'
       - '--allow-unauthenticated'
       - '--quiet'
 

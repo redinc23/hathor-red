@@ -8,7 +8,6 @@ STAGING_SERVICE="${STAGING_SERVICE:-hathor-red-staging}"
 PROD_SERVICE="${PROD_SERVICE:-hathor-red}"
 STAGING_SA_NAME="${STAGING_SA_NAME:-tool-stg-sa}"
 PROD_SA_NAME="${PROD_SA_NAME:-tool-prod-sa}"
-CB_SA="${CB_SA:-${PROJECT_NUMBER:-}@cloudbuild.gserviceaccount.com}"
 
 if [[ -z "${PROJECT_ID}" ]]; then
   echo "ERROR: PROJECT_ID is required"
@@ -17,7 +16,7 @@ if [[ -z "${PROJECT_ID}" ]]; then
 fi
 
 PROJECT_NUMBER="$(gcloud projects describe "${PROJECT_ID}" --format='value(projectNumber)')"
-CB_SA="${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com"
+CB_SA="${CB_SA:-${PROJECT_NUMBER}@cloudbuild.gserviceaccount.com}"
 
 echo "==> Configuring project ${PROJECT_ID}"
 gcloud config set project "${PROJECT_ID}" >/dev/null

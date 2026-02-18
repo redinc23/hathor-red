@@ -2,7 +2,7 @@ options:
   logging: CLOUD_LOGGING_ONLY
 
 steps:
-  - name: 'node:20'
+  - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-lc'
@@ -10,7 +10,7 @@ steps:
         corepack enable
         pnpm install --frozen-lockfile
 
-  - name: 'node:20'
+  - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-lc'
@@ -18,7 +18,7 @@ steps:
         corepack enable
         pnpm run lint:ci
 
-  - name: 'node:20'
+  - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-lc'
@@ -26,7 +26,7 @@ steps:
         corepack enable
         pnpm run test:all
 
-  - name: 'node:20'
+  - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-lc'
