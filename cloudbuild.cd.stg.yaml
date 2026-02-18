@@ -1,0 +1,84 @@
+substitutions:
+  _REGION: us-central1
+  _AR_REPO: containers
+
+  _PUB_SERVICE: hathor-red-public-stg
+  _ADM_SERVICE: hathor-red-admin-stg
+
+  _PUB_SA: hathor-red-public-stg-sa
+  _ADM_SA: hathor-red-admin-stg-sa
+
+steps:
+  - name: 'node:20'
+    id: 'install+validate'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        corepack enable
+        pnpm install --frozen-lockfile
+        pnpm run validate
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build public'
+    args:
+      - build
+      - -f
+      - services/public-api/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_PUB_SERVICE}:$COMMIT_SHA
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build admin'
+    args:
+      - build
+      - -f
+      - services/admin-api/Dockerfile
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_ADM_SERVICE}:$COMMIT_SHA
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push public'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_PUB_SERVICE}:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'push admin'
+    args: ['push', '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_ADM_SERVICE}:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy public (stg)'
+    args:
+      - run
+      - deploy
+      - ${_PUB_SERVICE}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_PUB_SERVICE}:$COMMIT_SHA
+      - --region
+      - ${_REGION}
+      - --service-account
+      - ${_PUB_SA}@$PROJECT_ID.iam.gserviceaccount.com
+      - --allow-unauthenticated
+      - --set-env-vars
+      - NODE_ENV=staging,PORT=8080,ENVIRONMENT=stg
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy admin (stg)'
+    args:
+      - run
+      - deploy
+      - ${_ADM_SERVICE}
+      - --image
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_ADM_SERVICE}:$COMMIT_SHA
+      - --region
+      - ${_REGION}
+      - --service-account
+      - ${_ADM_SA}@$PROJECT_ID.iam.gserviceaccount.com
+      - --set-env-vars
+      - NODE_ENV=staging,PORT=8080,ENVIRONMENT=stg
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_PUB_SERVICE}:$COMMIT_SHA'
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_ADM_SERVICE}:$COMMIT_SHA'

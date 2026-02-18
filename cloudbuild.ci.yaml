@@ -1,0 +1,11 @@
+steps:
+  - name: 'node:20'
+    id: 'install+validate'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        corepack enable
+        pnpm install --frozen-lockfile
+        pnpm run validate
