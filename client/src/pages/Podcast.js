@@ -26,6 +26,7 @@ const Podcast = () => {
 
     const bgEffectsRef = useRef(null);
     const commentInputRef = useRef(null);
+    const notificationTimerRef = useRef(null);
 
     // Initial Load & Particle Creation
     useEffect(() => {
@@ -67,8 +68,14 @@ const Podcast = () => {
 
     // Notification Logic
     const showNotification = (message) => {
+        if (notificationTimerRef.current) {
+            clearTimeout(notificationTimerRef.current);
+        }
         setNotification(message);
-        setTimeout(() => setNotification(null), 3000);
+        notificationTimerRef.current = setTimeout(() => {
+            setNotification(null);
+            notificationTimerRef.current = null;
+        }, 3000);
     };
 
     const generateEpisodes = () => {
@@ -197,7 +204,10 @@ const Podcast = () => {
         setPlayerState(prev => ({
             ...prev,
             title: episode.title,
-            artist: `Dark Matter Podcast • Episode #${episode.number}`
+            artist: `Dark Matter Podcast • Episode #${episode.number}`,
+            progress: 0,
+            currentTime: '0:00',
+            duration: episode.duration
         }));
         setIsPlaying(true);
         showNotification(`Playing: ${episode.title}`);
@@ -247,20 +257,16 @@ const Podcast = () => {
     };
 
     const toggleRepeat = () => {
-        setPlayerState(prev => {
-            const nextMode = (prev.repeat + 1) % 3;
-            const messages = ['Repeat off', 'Repeat all', 'Repeat one'];
-            showNotification(messages[nextMode]);
-            return { ...prev, repeat: nextMode };
-        });
+        const nextMode = (playerState.repeat + 1) % 3;
+        const messages = ['Repeat off', 'Repeat all', 'Repeat one'];
+        setPlayerState(prev => ({ ...prev, repeat: nextMode }));
+        showNotification(messages[nextMode]);
     };
 
     const toggleShuffle = () => {
-        setPlayerState(prev => {
-            const newState = !prev.shuffle;
-            showNotification(newState ? 'Shuffle mode activated' : 'Shuffle mode deactivated');
-            return { ...prev, shuffle: newState };
-        });
+        const newState = !playerState.shuffle;
+        setPlayerState(prev => ({ ...prev, shuffle: newState }));
+        showNotification(newState ? 'Shuffle mode activated' : 'Shuffle mode deactivated');
     };
 
     const toggleOffline = () => {
@@ -294,7 +300,7 @@ const Podcast = () => {
                     fontSize: '14px',
                     fontWeight: '600',
                     maxWidth: '300px',
-                    animation: 'fadeIn 0.3s ease forwards'
+                    animation: 'podcast-fadeIn 0.3s ease forwards'
                 }}>
                     {notification}
                 </div>
@@ -444,11 +450,11 @@ const Podcast = () => {
 
                                 <div className="podcast-rating">
                                     <div className="stars">
-                                        <i className="fas fa-star filled"></i>
-                                        <i className="fas fa-star filled"></i>
-                                        <i className="fas fa-star filled"></i>
-                                        <i className="fas fa-star filled"></i>
-                                        <i className="fas fa-star-half-alt filled"></i>
+                                        <i className="fas fa-star star filled"></i>
+                                        <i className="fas fa-star star filled"></i>
+                                        <i className="fas fa-star star filled"></i>
+                                        <i className="fas fa-star star filled"></i>
+                                        <i className="fas fa-star-half-alt star filled"></i>
                                     </div>
                                     <div className="rating-value">4.8 (24.8K ratings)</div>
                                 </div>
