@@ -24,6 +24,7 @@ const Home = () => {
             <Link to="/">Home</Link>
             <Link to="/playlists">Playlists</Link>
             <Link to="/rooms">Listening Rooms</Link>
+            <Link to="/podcast">Podcasts</Link>
             <div className="user-menu">
               <span>Welcome, {user?.display_name || user?.username}!</span>
               <button onClick={logout} className="btn-logout">Logout</button>
