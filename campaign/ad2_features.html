@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aether | Features</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00d4ff;
+            --secondary: #764ba2;
+            --accent: #ff1a8c;
+            --dark: #0a0a0a;
+            --darker: #050505;
+            --text: #ffffff;
+            --text-secondary: #b3b3b3;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .ad-container {
+            width: 1200px;
+            height: 628px;
+            background: radial-gradient(circle at 50% 10%, #1a1a2e 0%, #050505 100%);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #333;
+        }
+
+        /* Background grid */
+        .grid-bg {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+            opacity: 0.5;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            padding: 60px;
+            text-align: center;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .sub-tag {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: inline-block;
+            background: rgba(0, 212, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+        }
+
+        h2 {
+            font-size: 56px;
+            margin: 0;
+            background: linear-gradient(135deg, #fff 0%, #aaa 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: rgba(20, 20, 25, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 32px;
+            border-radius: 24px;
+            width: 280px;
+            text-align: left;
+            transition: transform 0.3s, border-color 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            background: rgba(30, 30, 40, 0.8);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .icon-box {
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 24px;
+            color: var(--primary);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .card-desc {
+            font-size: 15px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .download-btn {
+            background: var(--text);
+            color: #000;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+            transition: transform 0.2s;
+        }
+
+        .download-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .glow {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(118, 75, 162, 0.15) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="ad-container">
+        <div class="grid-bg"></div>
+        <div class="glow"></div>
+
+        <div class="content-wrapper">
+            <div class="header">
+                <span class="sub-tag">Aether Intelligence</span>
+                <h2>Smarter Streaming</h2>
+            </div>
+
+            <div class="cards-container">
+                <div class="feature-card">
+                    <div class="icon-box" style="color: #00d4ff;">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="card-title">AI Curation</div>
+                    <div class="card-desc">Algorithms that learn your mood and adapt in real-time. No more skipping tracks.</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon-box" style="color: #ff1a8c;">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="card-title">Smart Playlists</div>
+                    <div class="card-desc">Dynamic mixes generated daily based on your listening habits and favorite genres.</div>
+                </div>
+
+                <div class="feature-card">
+                    <div class="icon-box" style="color: #00ff88;">
+                        <i class="fas fa-signal"></i>
+                    </div>
+                    <div class="card-title">True Offline</div>
+                    <div class="card-desc">Download entire libraries in seconds. Listen anywhere, anytime, without data.</div>
+                </div>
+            </div>
+
+            <a href="#" class="download-btn">
+                <i class="fab fa-apple"></i> <i class="fab fa-android"></i> Download App
+            </a>
+        </div>
+    </div>
+</body>
+</html>
