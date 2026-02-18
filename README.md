@@ -249,6 +249,18 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for comprehensive deployment instructions cov
 - Process management
 - Monitoring and maintenance
 
+## 🔀 Pull Request Operations
+
+To approve or tag an existing pull request without the GitHub CLI, use:
+
+```bash
+export GITHUB_TOKEN=<token-with-repo-scope>
+scripts/manage-prs.sh --repo owner/repo --pr 123 --approve
+scripts/manage-prs.sh --repo owner/repo --pr 123 --tag needs-review
+```
+
+You can combine both actions in one command by passing `--approve` and `--tag` together.
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
