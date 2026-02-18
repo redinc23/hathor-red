@@ -378,8 +378,7 @@ output \"project_id\" { value = var.project_id }
 " "$FORCE"
 
   if [[ -f .gitignore ]]; then
-    safe_append_unique_block .gitignore "# --- mangu ---" "# --- mangu ---
-.env
+    safe_append_unique_block .gitignore "# --- mangu ---" ".env
 inventory/*.md
 cracklog/*.md"
   else
@@ -394,7 +393,7 @@ cracklog/*.md
 }
 
 main(){
-  need_cmd git; need_cmd python3
+  need_cmd git
   parse_args "$@"; validate_args
   generate
 }
