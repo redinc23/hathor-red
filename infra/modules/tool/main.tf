@@ -84,6 +84,36 @@ resource "google_project_iam_member" "datastore_admin" {
   member  = "serviceAccount:${each.value.email}"
 }
 
+resource "google_cloud_run_service_iam_member" "admin_invoker" {
+  for_each = var.enable_admin_plane ? {
+    for pair in setproduct(var.environments, var.admin_invoker_members) :
+    "${pair[0]}-${replace(pair[1], ":", "-")}" => {
+      service = local.admin_services[pair[0]]
+      member  = pair[1]
+    }
+  } : {}
+
+  project  = var.project_id
+  location = var.region
+  service  = each.value.service
+  role     = "roles/run.invoker"
+  member   = each.value.member
+}
+
+resource "google_cloud_run_service_iam_member" "public_unauthenticated" {
+  for_each = {
+    for env in var.environments :
+    env => local.public_services[env]
+    if var.public_allow_unauthenticated[env]
+  }
+
+  project  = var.project_id
+  location = var.region
+  service  = each.value
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
 output "artifact_registry_repository" {
   value = google_artifact_registry_repository.containers.name
 }

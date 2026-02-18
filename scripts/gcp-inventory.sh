@@ -18,6 +18,16 @@ require_cmd() {
 
 require_cmd gcloud
 
+if ! command -v rg >/dev/null 2>&1; then
+  if ! command -v grep >/dev/null 2>&1; then
+    echo "ERROR: Neither 'rg' nor 'grep' found in PATH." >&2
+    exit 1
+  fi
+  GREP_CMD=grep
+else
+  GREP_CMD=rg
+fi
+
 header() {
   echo
   echo "=================================================="
@@ -55,7 +65,7 @@ else
     [[ -z "${svc}" ]] && continue
     public_bindings=$(gcloud run services get-iam-policy "${svc}" \
       --project "${PROJECT_ID}" --region "${REGION}" \
-      --format="value(bindings.role,bindings.members)" | rg 'allUsers|allAuthenticatedUsers' || true)
+      --format="value(bindings.role,bindings.members)" | ${GREP_CMD} 'allUsers|allAuthenticatedUsers' || true)
 
     if [[ -n "${public_bindings}" ]]; then
       echo "${svc}: ${public_bindings}"
@@ -68,7 +78,7 @@ fi
 header "Service Accounts (tool runtime naming)"
 gcloud iam service-accounts list --project "${PROJECT_ID}" \
   --format="table(email,displayName,disabled)" \
-  --filter="email~'-public-(stg|prod)-sa@|email~'-admin-(stg|prod)-sa@'"
+  --filter="email~'-public-(stg|prod)-sa@' OR email~'-admin-(stg|prod)-sa@'"
 
 header "Firestore database"
 gcloud firestore databases list --project "${PROJECT_ID}" \
