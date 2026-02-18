@@ -7,6 +7,8 @@ steps:
       - |
         npm install -g pnpm@8.9.0
         pnpm install
+        cd client && pnpm install
+        cd ..
         pnpm run validate
 
   # Build Docker image to verify it builds correctly (without pushing)
