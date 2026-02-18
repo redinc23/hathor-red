@@ -98,6 +98,16 @@ app.use('/api/playback', playbackRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/ai', aiRoutes);
 
+
+// Fast liveness probes for Cloud Run and uptime checks
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Enhanced health check
 app.get('/api/health', async (req, res) => {
   const health = {

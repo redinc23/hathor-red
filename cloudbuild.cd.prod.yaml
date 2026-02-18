@@ -1,0 +1,50 @@
+substitutions:
+  _REGION: us-central1
+  _SERVICE: hathor-red-prod
+
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    id: build-image
+    args:
+      - build
+      - -t
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}'
+      - -t
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:prod'
+      - .
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-short-sha
+    args:
+      - push
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: push-prod-tag
+    args:
+      - push
+      - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:prod'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: deploy-prod
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        gcloud run deploy "${_SERVICE}" \
+          --project="${PROJECT_ID}" \
+          --region="${_REGION}" \
+          --platform=managed \
+          --image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}" \
+          --allow-unauthenticated \
+          --port=5000 \
+          --set-env-vars=NODE_ENV=production
+
+images:
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}'
+  - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:prod'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1800s
