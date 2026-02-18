@@ -13,6 +13,6 @@ module.exports = {
       jsx: true
     }
   },
-  ignorePatterns: ['node_modules', 'client/build', 'packages', 'dist', 'coverage'],
+  ignorePatterns: ['node_modules', 'client', 'packages', 'dist', 'coverage'],
   rules: {}
 };
