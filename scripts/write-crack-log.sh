@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${PROJECT_ID:=encoded-shape-487615-b1}"
+: "${PROJECT_ID:=your_google_cloud_project_id}"
 : "${REGION:=us-central1}"
 : "${OUT_PATH:=docs/crack-log.md}"
 
