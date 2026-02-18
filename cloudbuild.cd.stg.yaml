@@ -62,7 +62,7 @@ steps:
       - ${_PUB_SA}@$PROJECT_ID.iam.gserviceaccount.com
       - --allow-unauthenticated
       - --set-env-vars
-      - NODE_ENV=staging,PORT=8080,ENVIRONMENT=stg
+      - NODE_ENV=production,PORT=8080,ENVIRONMENT=stg
 
   - name: 'gcr.io/cloud-builders/gcloud'
     id: 'deploy admin (stg)'
@@ -77,7 +77,7 @@ steps:
       - --service-account
       - ${_ADM_SA}@$PROJECT_ID.iam.gserviceaccount.com
       - --set-env-vars
-      - NODE_ENV=staging,PORT=8080,ENVIRONMENT=stg
+      - NODE_ENV=production,PORT=8080,ENVIRONMENT=stg
 
 images:
   - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_PUB_SERVICE}:$COMMIT_SHA'
