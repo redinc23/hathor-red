@@ -62,16 +62,22 @@ sec "Cloud Run IAM (public/private check: allUsers invoker)"
 for s in "${SERVICES[@]}"; do
   if echo "${CR_SVCS_JSON}" | jq -e --arg n "${s}" 'any(.[]; .metadata.name==$n)' >/dev/null; then
     echo "service=${s}"
-    POLICY_JSON="$(gcloud run services get-iam-policy "${s}" --region "${REGION}" --format=json 2>/dev/null || echo '{}')"
-    ALLUSERS="$(echo "${POLICY_JSON}" | jq -r '[.bindings[]? | select(.role=="roles/run.invoker") | .members[]?] | map(select(.=="allUsers")) | length')"
-    if [[ "${ALLUSERS}" == "0" ]]; then
-      echo "  allUsers_invoker: NO"
+    POLICY_JSON="$(gcloud run services get-iam-policy "${s}" --region "${REGION}" --format=json 2>/dev/null)" || POLICY_FAILED=1
+    if [[ -n "${POLICY_FAILED:-}" ]]; then
+      echo "  allUsers_invoker: CHECK_FAILED (permissions missing)"
+      echo "  invokers: (unable to fetch IAM policy)"
+      unset POLICY_FAILED
     else
-      echo "  allUsers_invoker: YES (PUBLIC!)"
-    fi
+      ALLUSERS="$(echo "${POLICY_JSON}" | jq -r '[.bindings[]? | select(.role=="roles/run.invoker") | .members[]?] | map(select(.=="allUsers")) | length')"
+      if [[ "${ALLUSERS}" == "0" ]]; then
+        echo "  allUsers_invoker: NO"
+      else
+        echo "  allUsers_invoker: YES (PUBLIC!)"
+      fi
 
-    echo "  invokers:"
-    echo "${POLICY_JSON}" | jq -r '.bindings[]? | select(.role=="roles/run.invoker") | .members[]?' | sed 's/^/    - /' || true
+      echo "  invokers:"
+      echo "${POLICY_JSON}" | jq -r '.bindings[]? | select(.role=="roles/run.invoker") | .members[]?' | sed 's/^/    - /' || true
+    fi
   else
     echo "service=${s} (skipped: missing)"
   fi
@@ -109,7 +115,7 @@ sec "Monitoring Uptime Checks (prod /healthz)"
 # Requires Monitoring permissions.
 if gcloud monitoring uptime-checks list --format=json >/dev/null 2>&1; then
   UPTIME_JSON="$(gcloud monitoring uptime-checks list --format=json)"
-  echo "${UPTIME_JSON}" | jq -r '.[] | [.name, (.displayName // ""), (.httpCheck.path // ""), (.httpCheck.port|tostring // ""), (.monitoredResource.labels.host // "")] | @tsv' \
+  echo "${UPTIME_JSON}" | jq -r '.[] | [.name, (.displayName // ""), (.httpCheck.path // ""), (.httpCheck.port // "" | tostring), (.monitoredResource.labels.host // "")] | @tsv' \
     | awk 'BEGIN{FS="\t"} {printf "uptime_name=%s\tdisplay=%s\tpath=%s\tport=%s\thost=%s\n",$1,$2,$3,$4,$5}' \
     | sort || true
 else
@@ -127,11 +133,14 @@ done
 public_admin=0
 for s in "hathor-red-admin-stg" "hathor-red-admin-prod"; do
   if echo "${CR_SVCS_JSON}" | jq -e --arg n "${s}" 'any(.[]; .metadata.name==$n)' >/dev/null; then
-    POLICY_JSON="$(gcloud run services get-iam-policy "${s}" --region "${REGION}" --format=json 2>/dev/null || echo '{}')"
-    ALLUSERS="$(echo "${POLICY_JSON}" | jq -r '[.bindings[]? | select(.role=="roles/run.invoker") | .members[]?] | map(select(.=="allUsers")) | length')"
-    if [[ "${ALLUSERS}" != "0" ]]; then
-      public_admin=$((public_admin + 1))
+    POLICY_JSON="$(gcloud run services get-iam-policy "${s}" --region "${REGION}" --format=json 2>/dev/null)" || POLICY_FAILED=1
+    if [[ -z "${POLICY_FAILED:-}" ]]; then
+      ALLUSERS="$(echo "${POLICY_JSON}" | jq -r '[.bindings[]? | select(.role=="roles/run.invoker") | .members[]?] | map(select(.=="allUsers")) | length')"
+      if [[ "${ALLUSERS}" != "0" ]]; then
+        public_admin=$((public_admin + 1))
+      fi
     fi
+    unset POLICY_FAILED
   fi
 done
 
