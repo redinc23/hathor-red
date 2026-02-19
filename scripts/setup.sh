@@ -38,7 +38,7 @@ fi
 # 5. Git hooks
 if [ -d "$ROOT/.git" ]; then
   echo "==> Installing git hooks"
-  pnpm exec husky install
+  pnpm exec husky
 fi
 
 echo ""
