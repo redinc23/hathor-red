@@ -53,6 +53,8 @@ class Conclusion(str, Enum):
     SKIPPED = "skipped"
     NEUTRAL = "neutral"
     ACTION_REQUIRED = "action_required"
+    STARTUP_FAILURE = "startup_failure"
+    STALE = "stale"
 
 class EventType(str, Enum):
     WORKFLOW_RUN_COMPLETED = "workflow_run.completed"
@@ -78,7 +80,7 @@ class FailureFingerprint:
     matrix_key: str | None  # For matrix failures
 
     def hash(self) -> str:
-        content = f"{self.workflow_name}:{self.conclusion}:{self.event}:{self.matrix_key or ''}"
+        content = f"{self.workflow_name}:{self.conclusion.value}:{self.event}:{self.matrix_key or ''}"
         return hashlib.sha256(content.encode()).hexdigest()[:16]
 
 @dataclass(frozen=True, slots=True)
@@ -331,12 +333,19 @@ class GitHubRESTAdapter(GitHubPort):
         data = resp.json()
         log.debug("Fetched workflow run", status=resp.status_code)
 
+        try:
+            conclusion = Conclusion(data["conclusion"]) if data.get("conclusion") else Conclusion.NEUTRAL
+        except (KeyError, ValueError):
+            # Handle unknown conclusion values gracefully
+            log.warning("Unknown conclusion value", conclusion=data.get("conclusion"))
+            conclusion = Conclusion.NEUTRAL
+
         return WorkflowRun(
             id=run_id,
             name=data["name"],
             head_branch=data["head_branch"],
             head_sha=data["head_sha"],
-            conclusion=Conclusion(data["conclusion"]),
+            conclusion=conclusion,
             event=data["event"],
             html_url=data["html_url"],
             created_at=datetime.fromisoformat(data["created_at"].replace("Z", "+00:00")),
@@ -447,7 +456,7 @@ class GitHubRESTAdapter(GitHubPort):
         repo: str,
         fingerprint: FailureFingerprint,
     ) -> dict[str, Any] | None:
-        hash_str = fingerprint.hash()
+        hash_str = fingerprint.hash()[:8]  # Match the 8-char hash used in issue titles
         client = await self._get_client()
         token = await self._get_installation_token(owner, repo)
 
