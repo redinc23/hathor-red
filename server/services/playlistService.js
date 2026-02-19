@@ -35,7 +35,8 @@ const generateAIPlaylist = async (userId, { prompt, name, songCount = 10 }) => {
   let genres = analysis.genres || [];
 
   // Fallback to keyword matching if no genres detected (from playlistController)
-  if (genres.length === 0) {
+  // Skip fallback if keywords are present to avoid restricting keyword search
+  if (genres.length === 0 && (!analysis.keywords || analysis.keywords.length === 0)) {
     const keywords = prompt.toLowerCase().split(' ');
     if (keywords.some(k => ['chill', 'relax', 'calm'].includes(k))) {
       genres.push('Jazz', 'Classical', 'Electronic');
