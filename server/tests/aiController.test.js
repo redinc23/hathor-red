@@ -68,6 +68,8 @@ describe('AI Controller Performance', () => {
       call[0].includes('INSERT INTO playlist_songs')
     );
 
+    console.log(`Number of INSERT calls: ${insertCalls.length}`);
+
     // With bulk insert, we expect 1 call for 5 songs
     expect(insertCalls.length).toBe(1);
   });
