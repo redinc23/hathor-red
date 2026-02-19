@@ -327,8 +327,7 @@ const chat = async (req, res) => {
     // Process any actions
     let actionResults = null;
     if (response.actions && response.actions.length > 0) {
-      actionResults = [];
-      for (const action of response.actions) {
+      const results = await Promise.all(response.actions.map(async (action) => {
         if (action.type === 'search' && action.params?.query) {
           const searchResult = await db.query(
             `SELECT id, title, artist, album FROM songs
@@ -336,12 +335,14 @@ const chat = async (req, res) => {
              ORDER BY title LIMIT 5`,
             [`%${action.params.query}%`]
           );
-          actionResults.push({
+          return {
             type: 'search',
             results: searchResult.rows
-          });
+          };
         }
-      }
+        return null;
+      }));
+      actionResults = results.filter(Boolean);
     }
 
     res.json({
