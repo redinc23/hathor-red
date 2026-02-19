@@ -2,6 +2,17 @@
 process.env.JWT_SECRET = 'test-secret';
 process.env.JWT_EXPIRE = '1h';
 
+// Mock dependencies since they are missing in the environment
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn((payload) => JSON.stringify(payload)), // Simple mock token
+  verify: jest.fn((token) => JSON.parse(token)),
+}), { virtual: true });
+
+jest.mock('bcryptjs', () => ({
+  hash: jest.fn((pass) => Promise.resolve('hashed-' + pass)),
+  compare: jest.fn((pass, hash) => Promise.resolve(hash === 'hashed-' + pass)),
+}), { virtual: true });
+
 const { generateToken, hashPassword, comparePassword } = require('../utils/auth');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
