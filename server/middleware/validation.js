@@ -61,6 +61,18 @@ const aiPlaylistValidation = [
   body('name').optional().trim().isLength({ max: 100 })
 ];
 
+// Add-song-to-playlist validation
+const addSongToPlaylistValidation = [
+  body('playlistId').isInt({ min: 1 }).withMessage('Invalid playlist ID'),
+  body('songId').isInt({ min: 1 }).withMessage('Invalid song ID')
+];
+
+// Record listening validation
+const recordListeningValidation = [
+  body('songId').isInt({ min: 1 }).withMessage('Invalid song ID'),
+  body('duration').optional().isInt({ min: 0 }).withMessage('Duration must be a non-negative integer')
+];
+
 // Room validations
 const roomValidation = [
   body('name').trim().notEmpty().isLength({ max: 100 }),
@@ -78,6 +90,8 @@ module.exports = {
   registerValidation,
   loginValidation,
   songUploadValidation,
+  addSongToPlaylistValidation,
+  recordListeningValidation,
   playlistValidation,
   aiPlaylistValidation,
   roomValidation,

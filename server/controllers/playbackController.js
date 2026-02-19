@@ -5,9 +5,14 @@ const getPlaybackState = async (req, res) => {
   try {
     const { userId } = req.user;
 
-    // Try Redis first for speed
+    // Try Redis first for speed; fall through to DB on failure
     const cacheKey = `playback:${userId}`;
-    const cached = await redisClient.get(cacheKey);
+    let cached = null;
+    try {
+      cached = await redisClient.get(cacheKey);
+    } catch (redisErr) {
+      console.error('Redis get error (falling back to DB):', redisErr.message);
+    }
 
     if (cached) {
       return res.json({ state: JSON.parse(cached) });
@@ -24,7 +29,11 @@ const getPlaybackState = async (req, res) => {
     }
 
     const state = result.rows[0];
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(state));
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(state));
+    } catch (redisErr) {
+      console.error('Redis setEx error (cache miss, state still returned):', redisErr.message);
+    }
 
     res.json({ state });
   } catch (error) {
@@ -64,9 +73,13 @@ const updatePlaybackState = async (req, res) => {
 
     const state = result.rows[0];
 
-    // Update Redis cache
+    // Update Redis cache; DB write already succeeded so don't fail the request on cache error
     const cacheKey = `playback:${userId}`;
-    await redisClient.setEx(cacheKey, 3600, JSON.stringify(state));
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(state));
+    } catch (redisErr) {
+      console.error('Redis setEx error (DB update succeeded):', redisErr.message);
+    }
 
     res.json({
       message: 'Playback state updated',

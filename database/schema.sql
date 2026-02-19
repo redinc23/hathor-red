@@ -60,7 +60,8 @@ CREATE TABLE IF NOT EXISTS listening_rooms (
     is_playing BOOLEAN DEFAULT FALSE,
     is_public BOOLEAN DEFAULT TRUE,
     max_listeners INTEGER DEFAULT 50,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Room Participants
