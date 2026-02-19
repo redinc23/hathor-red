@@ -108,8 +108,14 @@ jobs:
           node-version: '18.17.0'
           cache: 'pnpm'
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: pnpm install --frozen-lockfile
+
+      # client/ is not in the pnpm workspace so its deps (react-scripts)
+      # are not installed by the root install. Must be done separately.
+      - name: Install client dependencies
+        run: pnpm install --frozen-lockfile
+        working-directory: client
 
       - name: Build client
         run: pnpm run build
