@@ -1,5 +1,6 @@
 const db = require('../config/database');
 const colabAIService = require('../services/colabAIService');
+const { bulkInsertPlaylistSongs } = require('../utils/playlistHelpers');
 
 const getPlaylists = async (req, res) => {
   try {
@@ -198,19 +199,7 @@ const generateAIPlaylist = async (req, res) => {
 
     const playlist = playlistResult.rows[0];
 
-    if (songsResult.rows.length > 0) {
-      const values = [];
-      const placeholders = [];
-      let paramIndex = 1;
-
-      songsResult.rows.forEach((song, index) => {
-        placeholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
-        values.push(playlist.id, song.id, index + 1);
-      });
-
-      const insertQuery = `INSERT INTO playlist_songs (playlist_id, song_id, position) VALUES ${placeholders.join(', ')}`;
-      await db.query(insertQuery, values);
-    }
+    await bulkInsertPlaylistSongs(playlist.id, songsResult.rows);
 
     res.status(201).json({
       message: 'AI playlist generated successfully',
