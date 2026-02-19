@@ -1,6 +1,12 @@
 import React, { useEffect } from 'react';
 import { usePlayer } from '../contexts/PlayerContext';
-import './Player.css';
+import './player/Player.css';
+
+import SongInfo from './player/SongInfo';
+import PlayerControls from './player/PlayerControls';
+import VolumeControl from './player/VolumeControl';
+import VibeControls from './player/VibeControls';
+import StemControls from './player/StemControls';
 
 const Player = () => {
   const {
@@ -43,18 +49,6 @@ const Player = () => {
     };
   }, [audioRef, pause, setCurrentTime, setDuration]);
 
-  const formatTime = (seconds) => {
-    if (!seconds || isNaN(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleSeek = (e) => {
-    const percent = e.target.value / 100;
-    seek(duration * percent);
-  };
-
   if (!currentSong) {
     return (
       <div className="player-container">
@@ -71,106 +65,35 @@ const Player = () => {
       <audio ref={audioRef} />
       
       <div className="player-main">
-        <div className="song-info">
-          {currentSong.cover_url && (
-            <img src={currentSong.cover_url} alt={currentSong.title} className="song-cover" />
-          )}
-          <div className="song-details">
-            <h3>{currentSong.title}</h3>
-            <p>{currentSong.artist}</p>
-          </div>
-        </div>
+        <SongInfo currentSong={currentSong} />
 
-        <div className="player-controls">
-          <button onClick={isPlaying ? pause : resume} className="play-pause-btn">
-            {isPlaying ? '⏸' : '▶'}
-          </button>
+        <PlayerControls
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          pause={pause}
+          resume={resume}
+          seek={seek}
+        />
 
-          <div className="progress-container">
-            <span className="time">{formatTime(currentTime)}</span>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={(currentTime / duration) * 100 || 0}
-              onChange={handleSeek}
-              className="progress-bar"
-            />
-            <span className="time">{formatTime(duration)}</span>
-          </div>
-        </div>
-
-        <div className="player-volume">
-          <span>🔊</span>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={volume * 100}
-            onChange={(e) => changeVolume(e.target.value / 100)}
-            className="volume-slider"
-          />
-        </div>
+        <VolumeControl
+          volume={volume}
+          changeVolume={changeVolume}
+        />
       </div>
 
       <div className="player-advanced">
-        <div className="vibe-controls">
-          <h4>Vibe Controls</h4>
-          
-          <div className="control-group">
-            <label>Speed: {playbackSpeed.toFixed(1)}x</label>
-            <input
-              type="range"
-              min="50"
-              max="200"
-              value={playbackSpeed * 100}
-              onChange={(e) => changePlaybackSpeed(e.target.value / 100)}
-              className="control-slider"
-            />
-          </div>
+        <VibeControls
+          playbackSpeed={playbackSpeed}
+          pitchShift={pitchShift}
+          changePlaybackSpeed={changePlaybackSpeed}
+          changePitchShift={changePitchShift}
+        />
 
-          <div className="control-group">
-            <label>Pitch: {pitchShift > 0 ? '+' : ''}{pitchShift}</label>
-            <input
-              type="range"
-              min="-12"
-              max="12"
-              value={pitchShift}
-              onChange={(e) => changePitchShift(parseInt(e.target.value))}
-              className="control-slider"
-            />
-          </div>
-        </div>
-
-        <div className="stem-controls">
-          <h4>Stem Separation</h4>
-          <div className="stem-buttons">
-            <button
-              onClick={() => toggleStem('vocals')}
-              className={stemsConfig.vocals ? 'stem-btn active' : 'stem-btn'}
-            >
-              Vocals
-            </button>
-            <button
-              onClick={() => toggleStem('drums')}
-              className={stemsConfig.drums ? 'stem-btn active' : 'stem-btn'}
-            >
-              Drums
-            </button>
-            <button
-              onClick={() => toggleStem('bass')}
-              className={stemsConfig.bass ? 'stem-btn active' : 'stem-btn'}
-            >
-              Bass
-            </button>
-            <button
-              onClick={() => toggleStem('other')}
-              className={stemsConfig.other ? 'stem-btn active' : 'stem-btn'}
-            >
-              Other
-            </button>
-          </div>
-        </div>
+        <StemControls
+          stemsConfig={stemsConfig}
+          toggleStem={toggleStem}
+        />
       </div>
     </div>
   );

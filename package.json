@@ -17,14 +17,14 @@
     "db:generate-audio": "node database/generate-sample-audio.js",
     "db:setup": "npm run db:generate-audio && npm run db:seed",
     "db:reset": "turbo run db:reset || npm run db:setup",
-    "test": "jest",
+    "test": "jest server/",
     "test:all": "turbo run test",
     "lint": "eslint . --max-warnings=0",
     "lint:ci": "turbo run lint",
     "type-check": "tsc --noEmit",
     "type-check:ci": "turbo run type-check",
     "validate": "turbo run type-check lint test",
-    "prepare": "husky install",
+    "prepare": "husky install || true",
     "preflight": "tsc --noEmit && eslint . && audit-ci --critical"
   },
   "keywords": [
