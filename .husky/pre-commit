@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+# Husky pre-commit hook — same checks as CI.
+# Keeps the lint + test gate local so broken code never reaches the remote.
+
+set -e
+
+ROOT="$(git rev-parse --show-toplevel)"
+
+echo "pre-commit: lint"
+"$ROOT/node_modules/.bin/eslint" . --max-warnings=0
+
+echo "pre-commit: tests"
+"$ROOT/node_modules/.bin/jest" --passWithNoTests
