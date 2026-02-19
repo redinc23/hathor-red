@@ -13,6 +13,7 @@ const SongList = () => {
 
   useEffect(() => {
     loadSongs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search, selectedGenre]);
 
   const loadSongs = async () => {
