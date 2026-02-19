@@ -12,6 +12,7 @@ const { connectRedis, getRedisClient } = require('./config/redis');
 const db = require('./config/database');
 const setupSocketHandlers = require('./socket/handlers');
 const { logger, requestLogger } = require('./utils/logger');
+const corsOptions = require('./config/cors');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -27,11 +28,7 @@ const colabAIService = require('./services/colabAIService');
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
-    methods: ['GET', 'POST'],
-    credentials: true
-  }
+  cors: corsOptions
 });
 
 // Security middleware
@@ -70,10 +67,7 @@ app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
 // CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
-  credentials: true
-}));
+app.use(cors(corsOptions));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
