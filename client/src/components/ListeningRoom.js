@@ -28,7 +28,6 @@ const ListeningRoom = () => {
     });
 
     newSocket.on('connect', () => {
-      console.log('Connected to socket');
       newSocket.emit('join-room', id);
     });
 
