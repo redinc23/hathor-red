@@ -114,6 +114,14 @@ class TriageIssue:
     labels: tuple[str, ...]
     metadata: dict[str, Any] = field(default_factory=dict)
 
+@dataclass(frozen=True, slots=True)
+class CommitInfo:
+    """Lightweight commit representation returned by get_commits_for_file."""
+    sha: str
+    author: str        # GitHub login or committer name
+    message: str
+    committed_at: datetime
+
 # -----------------------------------------------------------------------------
 # Ports (Abstract Interfaces)
 # -----------------------------------------------------------------------------
@@ -169,6 +177,29 @@ class GitHubPort(ABC):
         path: str,
         ref: str,
     ) -> str | None: ...
+
+    @abstractmethod
+    async def create_issue(
+        self,
+        owner: str,
+        repo: str,
+        title: str,
+        body: str,
+        labels: list[str] | None = None,
+        assignees: list[str] | None = None,
+    ) -> dict[str, Any]: ...
+
+    @abstractmethod
+    async def get_code_files(self, owner: str, repo: str) -> list[str]: ...
+
+    @abstractmethod
+    async def get_commits_for_file(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        limit: int = 20,
+    ) -> list[CommitInfo]: ...
 
 class RemediationStrategy(ABC):
     """Pluggable fix strategies."""
@@ -446,6 +477,86 @@ class GitHubRESTAdapter(GitHubPort):
         if data.get("encoding") == "base64":
             return base64.b64decode(data["content"]).decode("utf-8")
         return None
+
+    async def create_issue(
+        self,
+        owner: str,
+        repo: str,
+        title: str,
+        body: str,
+        labels: list[str] | None = None,
+        assignees: list[str] | None = None,
+    ) -> dict[str, Any]:
+        client = await self._get_client()
+        token = await self._get_installation_token(owner, repo)
+
+        payload: dict[str, Any] = {"title": title, "body": body}
+        if labels is not None:
+            payload["labels"] = labels
+        if assignees is not None:
+            payload["assignees"] = assignees
+
+        resp = await client.post(
+            f"https://api.github.com/repos/{owner}/{repo}/issues",
+            headers={"Authorization": f"Bearer {token}"},
+            json=payload,
+        )
+        resp.raise_for_status()
+        return resp.json()
+
+    async def get_code_files(self, owner: str, repo: str) -> list[str]:
+        """Return paths of all blobs in the default branch tree."""
+        client = await self._get_client()
+        token = await self._get_installation_token(owner, repo)
+
+        resp = await client.get(
+            f"https://api.github.com/repos/{owner}/{repo}/git/trees/HEAD",
+            headers={"Authorization": f"Bearer {token}"},
+            params={"recursive": "1"},
+        )
+        resp.raise_for_status()
+        return [
+            item["path"]
+            for item in resp.json().get("tree", [])
+            if item["type"] == "blob"
+        ]
+
+    async def get_commits_for_file(
+        self,
+        owner: str,
+        repo: str,
+        path: str,
+        limit: int = 20,
+    ) -> list[CommitInfo]:
+        client = await self._get_client()
+        token = await self._get_installation_token(owner, repo)
+
+        resp = await client.get(
+            f"https://api.github.com/repos/{owner}/{repo}/commits",
+            headers={"Authorization": f"Bearer {token}"},
+            params={"path": path, "per_page": limit},
+        )
+        resp.raise_for_status()
+
+        commits: list[CommitInfo] = []
+        for data in resp.json():
+            try:
+                # Prefer GitHub login; fall back to git committer name
+                author = (
+                    (data.get("author") or {}).get("login")
+                    or data["commit"]["author"]["name"]
+                )
+                commits.append(CommitInfo(
+                    sha=data["sha"],
+                    author=author,
+                    message=data["commit"]["message"],
+                    committed_at=datetime.fromisoformat(
+                        data["commit"]["author"]["date"].replace("Z", "+00:00")
+                    ),
+                ))
+            except (KeyError, TypeError):
+                continue
+        return commits
 
 class RedisStateStore(StateStore):
     """Redis-backed state with TTL for automatic cleanup."""
