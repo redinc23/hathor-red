@@ -9,7 +9,7 @@
     "dev": "turbo run dev || npm run dev:legacy",
     "server": "nodemon server/index.js",
     "client": "cd client && npm start",
-    "build": "cd client && npm run build",
+    "build": "cd client && pnpm install --frozen-lockfile && pnpm run build",
     "deploy": "docker build -t hathor-music:latest .",
     "build:ci": "turbo run build -- --dry-run || npm run build",
     "install-all": "npm install && cd client && npm install",

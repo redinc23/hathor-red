@@ -28,9 +28,9 @@ WORKDIR /app
 # Install pnpm
 RUN npm install -g pnpm@8.9.0
 
-# Install production dependencies only
+# Install production dependencies only (ignore scripts to skip husky)
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
+RUN pnpm install --prod --frozen-lockfile --ignore-scripts
 
 # Copy built client and server
 COPY --from=builder /app/client/build ./client/build
