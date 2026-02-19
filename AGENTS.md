@@ -2,8 +2,8 @@
 
 This repository uses Cursor rules to enforce disciplined, predictable changes.
 
-## Core principle: one task only
-If a request contains more than one task, the agent must stop and ask the user to pick exactly one task before proceeding.
+## Core principle: handle all requested tasks in scope
+If a request contains more than one task, the agent should complete all requested tasks in a single scoped plan unless the user asks to defer or split them.
 
 ## Workflow (always)
 1. Plan
@@ -20,7 +20,7 @@ If a request contains more than one task, the agent must stop and ask the user t
    - If no tooling exists, explain what verification would be used
 4. Stop
    - Summarize changes, verification, and confidence
-   - Do not proceed to additional tasks
+   - Confirm all requested tasks are completed or clearly list what remains
 
 ## Documentation is code
 If changes affect behavior, setup, features, or deployment:
