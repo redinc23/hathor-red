@@ -1,0 +1,34 @@
+# develop -> staging deployment.
+# Uses buildpacks via gcloud run deploy --source . (simple, works without Dockerfile).
+substitutions:
+  _REGION: "us-central1"
+  _SERVICE_PUBLIC: "hathor-red-public-stg"
+  _SERVICE_ADMIN: "hathor-red-admin-stg"
+  _ALLOW_PUBLIC_STG: "true" # decision point: public-stg can be public
+steps:
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    args:
+      - "-lc"
+      - |
+        set -euo pipefail
+        gcloud config set run/region "${_REGION}"
+
+        echo "Deploy public staging service..."
+        gcloud run deploy "${_SERVICE_PUBLIC}" --source . --quiet
+
+        echo "Deploy admin staging service..."
+        gcloud run deploy "${_SERVICE_ADMIN}" --source . --quiet
+
+        if [[ "${_ALLOW_PUBLIC_STG}" == "true" ]]; then
+          echo "Making public-stg invokable by allUsers (explicit)..."
+          gcloud run services add-iam-policy-binding "${_SERVICE_PUBLIC}" \
+            --member="allUsers" --role="roles/run.invoker" --region "${_REGION}" --quiet
+        fi
+
+        echo "Ensuring admin-stg is NOT public..."
+        # Remove allUsers if present (idempotent best-effort).
+        gcloud run services remove-iam-policy-binding "${_SERVICE_ADMIN}" \
+          --member="allUsers" --role="roles/run.invoker" --region "${_REGION}" --quiet || true
+options:
+  logging: CLOUD_LOGGING_ONLY
