@@ -10,25 +10,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Install pnpm
         uses: pnpm/action-setup@v2
         with:
           version: 8.9.0
-      - name: Setup Node.js
+
+      - name: Setup Node.js 18.17.0
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '18.17.0'
           cache: 'pnpm'
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      # Snyk: dependency vulnerability check.
+      # continue-on-error: we want the scan to report but not block merges
+      # until the SNYK_TOKEN secret is configured.
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        continue-on-error: true
+
+      # Trivy: filesystem + secret scan.
+      # Pin to a specific release for reproducibility.
       - name: Run Trivy (vuln + secret)
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           scan-type: 'fs'
           scan-ref: '.'
