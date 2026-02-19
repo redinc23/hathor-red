@@ -1,0 +1,45 @@
+# CODEOWNERS — hathor-red
+#
+# Every path listed here requires explicit approval from the listed owner
+# before any PR can be merged. GitHub enforces this when branch protection
+# is enabled with "Require review from Code Owners".
+#
+# Syntax: <path pattern>   @<github-username>
+# Patterns are evaluated top-to-bottom; last match wins.
+# Directories match all files recursively.
+
+# ── Default owner for everything not matched below ────────────────────────
+*                                   @redinc23
+
+# ── Database schema & migrations ──────────────────────────────────────────
+# Schema changes affect every service. No agent may merge these alone.
+/database/                          @redinc23
+
+# ── Server core ───────────────────────────────────────────────────────────
+/server/index.js                    @redinc23
+/server/config/                     @redinc23
+
+# ── Authentication & security middleware ──────────────────────────────────
+# Any change here has auth-wide blast radius.
+/server/middleware/auth.js          @redinc23
+/server/middleware/validation.js    @redinc23
+/server/utils/auth.js               @redinc23
+
+# ── Socket handlers ───────────────────────────────────────────────────────
+# Real-time sync and room control; security-sensitive (broadcast scope).
+/server/socket/                     @redinc23
+
+# ── Routes ────────────────────────────────────────────────────────────────
+# Route files wire validation → controller; changes affect API contracts.
+/server/routes/                     @redinc23
+
+# ── CI/CD and GitHub configuration ────────────────────────────────────────
+# Workflow and action changes affect the entire pipeline.
+/.github/                           @redinc23
+
+# ── Environment and deployment configuration ──────────────────────────────
+Dockerfile                          @redinc23
+docker-compose.yml                  @redinc23
+/nginx/                             @redinc23
+railway.json                        @redinc23
+render.yaml                         @redinc23

@@ -22,6 +22,9 @@ const setupSocketHandlers = (io) => {
   io.on('connection', (socket) => {
     console.log(`User connected: ${socket.username} (${socket.userId})`);
 
+    // Join a user-specific room for cross-device sync
+    socket.join(`user-${socket.userId}`);
+
     // Join a listening room
     socket.on('join-room', async (roomId) => {
       try {
@@ -168,8 +171,8 @@ const setupSocketHandlers = (io) => {
           ]
         );
 
-        // Broadcast to user's other devices
-        socket.broadcast.emit(`sync-${socket.userId}`, state);
+        // Broadcast to user's other devices only (via user-specific room)
+        socket.to(`user-${socket.userId}`).emit('sync-state', state);
       } catch (error) {
         console.error('Sync state error:', error);
       }

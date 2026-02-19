@@ -108,7 +108,7 @@ const joinRoom = async (req, res) => {
       [id]
     );
 
-    if (countResult.rows[0].count >= room.max_listeners) {
+    if (parseInt(countResult.rows[0].count, 10) >= room.max_listeners) {
       return res.status(403).json({ error: 'Room is full' });
     }
 

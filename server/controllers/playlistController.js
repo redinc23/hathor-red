@@ -201,10 +201,10 @@ const generateAIPlaylist = async (req, res) => {
     if (songsResult.rows.length > 0) {
       const values = [];
       const placeholders = [];
-      let paramIndex = 1;
+      let batchParamIndex = 1;
 
       songsResult.rows.forEach((song, index) => {
-        placeholders.push(`($${paramIndex++}, $${paramIndex++}, $${paramIndex++})`);
+        placeholders.push(`($${batchParamIndex++}, $${batchParamIndex++}, $${batchParamIndex++})`);
         values.push(playlist.id, song.id, index + 1);
       });
 
