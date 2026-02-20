@@ -24,7 +24,7 @@
     "type-check": "tsc --noEmit",
     "type-check:ci": "turbo run type-check",
     "validate": "turbo run type-check lint test",
-    "prepare": "husky",
+    "prepare": "node -e \"if (process.env.NODE_ENV === 'production') process.exit(0); try { require('husky'); process.exit(1) } catch (e) { process.exit(0) }\" || husky",
     "preflight": "tsc --noEmit && eslint . && audit-ci --critical"
   },
   "keywords": [
