@@ -1,0 +1,16 @@
+steps:
+  - name: 'node:18-bullseye'
+    id: install-and-validate
+    entrypoint: bash
+    args:
+      - -ceu
+      - |
+        corepack enable
+        corepack prepare pnpm@8.9.0 --activate
+        pnpm install --frozen-lockfile
+        pnpm run validate
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+timeout: 1200s

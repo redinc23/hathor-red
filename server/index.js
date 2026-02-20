@@ -93,6 +93,16 @@ app.use('/api/playback', playbackRoutes);
 app.use('/api/rooms', roomRoutes);
 app.use('/api/ai', aiRoutes);
 
+
+// Fast liveness probes for Cloud Run and uptime checks
+app.get('/healthz', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Enhanced health check
 app.get('/api/health', async (req, res) => {
   const health = {
@@ -141,7 +151,7 @@ setupSocketHandlers(io);
 app.use((err, req, res, next) => {
   logger.error(err.stack);
   res.status(err.status || 500).json({
-    error: process.env.NODE_ENV === 'production'
+    error: process.env.NODE_ENV === 'production' && process.env.DEPLOY_ENV !== 'staging'
       ? 'Internal server error'
       : err.message
   });
