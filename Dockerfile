@@ -7,12 +7,11 @@ WORKDIR /app
 RUN npm install -g pnpm@8.9.0
 
 # Copy package files
-COPY package.json pnpm-lock.yaml ./
-COPY client/package.json client/pnpm-lock.yaml ./client/
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY client/package.json ./client/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
-RUN cd client && pnpm install --frozen-lockfile
 
 # Copy source code
 COPY . .
@@ -29,8 +28,9 @@ WORKDIR /app
 RUN npm install -g pnpm@8.9.0
 
 # Install production dependencies only
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod --frozen-lockfile
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY client/package.json ./client/
+RUN pnpm install --prod --frozen-lockfile --filter .
 
 # Copy built client and server
 COPY --from=builder /app/client/build ./client/build
