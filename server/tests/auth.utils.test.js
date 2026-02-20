@@ -2,6 +2,7 @@
 process.env.JWT_SECRET = 'test-secret';
 process.env.JWT_EXPIRE = '1h';
 
+
 const { generateToken, hashPassword, comparePassword } = require('../utils/auth');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
