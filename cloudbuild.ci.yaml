@@ -1,0 +1,35 @@
+options:
+  logging: CLOUD_LOGGING_ONLY
+
+steps:
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        corepack enable
+        pnpm install --frozen-lockfile
+
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        corepack enable
+        pnpm run lint:ci
+
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        corepack enable
+        pnpm run test:all
+
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-lc'
+      - |
+        corepack enable
+        pnpm run build:ci
