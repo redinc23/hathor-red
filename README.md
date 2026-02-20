@@ -102,9 +102,9 @@ hathor-red/
 ### Prerequisites
 
 - Node.js 18.x or higher
+- pnpm 8.x or higher
 - PostgreSQL 13.x or higher
 - Redis 6.x or higher
-- npm or yarn
 
 ### Installation
 
@@ -116,8 +116,7 @@ hathor-red/
 
 2. **Install dependencies**
    ```bash
-   npm install
-   cd client && npm install && cd ..
+   pnpm install
    ```
 
 3. **Setup PostgreSQL database**
@@ -146,14 +145,14 @@ hathor-red/
 6. **Start the application**
    ```bash
    # Development mode (runs both frontend and backend)
-   npm run dev
+   pnpm run dev
    
    # Or separately:
    # Terminal 1 - Backend
-   npm run server
+   pnpm run server
    
    # Terminal 2 - Frontend
-   npm run client
+   pnpm run client
    ```
 
 7. **Access the application**
@@ -221,19 +220,19 @@ The UI features a modern, gradient-based design with:
 
 ```bash
 # Install all dependencies (root + client)
-npm run install-all
+pnpm install
 
 # Start both servers concurrently
-npm run dev
+pnpm run dev
 
 # Start backend only
-npm run server
+pnpm run server
 
 # Start frontend only
-npm run client
+pnpm run client
 
 # Build frontend for production
-npm run build
+pnpm run build
 ```
 
 ### Environment Variables
