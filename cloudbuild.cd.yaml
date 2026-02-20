@@ -1,0 +1,68 @@
+substitutions:
+  _REGION: us-central1
+  _SERVICE: hathor-red
+  _AR_REPO: containers
+  _RUNTIME_SA: hathor-red-runtime
+
+steps:
+  - name: 'node:18'
+    id: 'npm install'
+    entrypoint: bash
+    args: ['-c', 'set -euo pipefail; npm install -g pnpm@8.9.0 && pnpm install --frozen-lockfile']
+
+  - name: 'node:18'
+    id: 'lint (if present)'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        npm install -g pnpm@8.9.0
+        node -e "process.exit(require('./package.json').scripts?.['lint:ci']?0:1)" || exit 0
+        pnpm run lint:ci
+
+  - name: 'node:18'
+    id: 'test (if present)'
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        npm install -g pnpm@8.9.0
+        node -e "process.exit(require('./package.json').scripts?.test?0:1)" || exit 0
+        pnpm test
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'docker build'
+    args:
+      - 'build'
+      - '-t'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$COMMIT_SHA'
+      - '.'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'docker push'
+    args:
+      - 'push'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'deploy cloud run'
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE}'
+      - '--image'
+      - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$COMMIT_SHA'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--service-account'
+      - '${_RUNTIME_SA}@$PROJECT_ID.iam.gserviceaccount.com'
+      - '--set-env-vars'
+      - 'NODE_ENV=production,PORT=8080'
+      - '--allow-unauthenticated'
+
+images:
+  - '${_REGION}-docker.pkg.dev/$PROJECT_ID/${_AR_REPO}/${_SERVICE}:$COMMIT_SHA'
