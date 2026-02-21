@@ -56,7 +56,7 @@ def create_backlog_item(db: Session, payload: BacklogIn) -> BacklogItem:
 
 def list_backlog(db: Session) -> list[BacklogItem]:
     items = db.exec(select(BacklogItem)).all()
-    items.sort(key=lambda x: (x.wsjf, x.created_at.timestamp()), reverse=True)
+    items.sort(key=lambda x: (-x.wsjf, x.created_at.timestamp()))
     return items
 
 
