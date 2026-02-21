@@ -37,6 +37,8 @@ steps:
           --platform=managed \
           --image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}" \
           --port=5000 \
+          --memory=512Mi \
+          --cpu=1 \
           --http-health-check-path=/healthz \
           --set-env-vars=NODE_ENV=production,CLIENT_URL=${CLIENT_URL} \
           --set-secrets=DATABASE_URL=projects/${PROJECT_ID}/secrets/DATABASE_URL/versions/latest,REDIS_URL=projects/${PROJECT_ID}/secrets/REDIS_URL/versions/latest,JWT_SECRET=projects/${PROJECT_ID}/secrets/JWT_SECRET/versions/latest
