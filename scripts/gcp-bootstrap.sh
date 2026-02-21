@@ -76,6 +76,6 @@ for ROLE in roles/run.admin roles/artifactregistry.writer roles/iam.serviceAccou
     --member="serviceAccount:${CLOUDBUILD_SA}" \
     --role="${ROLE}" \
     --condition=None >/dev/null
- done
+  done
 
 echo "✅ Bootstrap complete. Next: link repo in Developer Connect and create Cloud Build triggers."
