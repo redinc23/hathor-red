@@ -38,7 +38,7 @@ SERVICE_STG="hathor-red-stg"
 
 gcloud run services add-iam-policy-binding "$SERVICE_STG" \
   --region="$REGION" \
-  --member="user:renee@mangu-publishers.com" \
+  --member="user:user@example.com" \
   --role="roles/run.invoker"
 ```
 
