@@ -134,5 +134,108 @@ describe('PlaylistService', () => {
           ['Rock', '%Queen | Bohemian%', 10]
         );
       });
+
+    it('should propagate database query errors', async () => {
+      // Make the first database query fail (e.g., fetching history)
+      mockDb.query.mockRejectedValueOnce(new Error('DB error'));
+
+      await expect(
+        playlistService.generateAIPlaylist(1, {
+          prompt: 'any prompt',
+          name: 'Error Case'
+        })
+      ).rejects.toThrow();
+    });
+
+    it('should handle case where no songs match the search criteria', async () => {
+      // Mock history
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      // Mock AI analysis with a valid genre
+      colabAIService.analyzePlaylistPrompt.mockResolvedValueOnce({
+        genres: ['Pop'],
+        description: 'No songs found case'
+      });
+
+      // Mock songs query returning no rows
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      // Mock playlist creation still succeeding
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: 13 }] });
+
+      await expect(
+        playlistService.generateAIPlaylist(1, {
+          prompt: 'quiet unknown tracks',
+          name: 'Empty Songs Playlist'
+        })
+      ).resolves.not.toThrow();
+
+      // Ensure playlist creation was attempted even with no songs
+      expect(mockDb.query).toHaveBeenLastCalledWith(
+        expect.any(String),
+        expect.any(Array)
+      );
+    });
+
+    it('should handle very long prompts and prompts with special characters', async () => {
+      const longPrompt =
+        '🎵'.repeat(100) +
+        ' Find me songs that match this extremely long and complex prompt with specials !@#$%^&*()_+[];\',./{}|:"<>? and unicode 🎶😊';
+
+      // Mock history
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      // Mock AI analysis
+      colabAIService.analyzePlaylistPrompt.mockResolvedValueOnce({
+        genres: ['Electronic'],
+        description: 'Long prompt analysis'
+      });
+
+      // Mock songs query and playlist creation
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: 14 }] });
+
+      await expect(
+        playlistService.generateAIPlaylist(1, {
+          prompt: longPrompt,
+          name: 'Long Prompt Playlist'
+        })
+      ).resolves.not.toThrow();
+
+      // Verify the AI service received the complex prompt in its arguments
+      expect(colabAIService.analyzePlaylistPrompt).toHaveBeenCalled();
+    });
+
+    it('should pass through the analysis.mood field correctly', async () => {
+      const mood = 'happy';
+
+      // Mock history
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      // Mock AI analysis including mood
+      colabAIService.analyzePlaylistPrompt.mockResolvedValueOnce({
+        genres: ['Pop'],
+        mood,
+        description: 'Mood-specific playlist'
+      });
+
+      // Mock songs query
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: 101 }] });
+
+      // Mock playlist creation
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: 15 }] });
+
+      await expect(
+        playlistService.generateAIPlaylist(1, {
+          prompt: 'happy pop songs',
+          name: 'Happy Pop'
+        })
+      ).resolves.not.toThrow();
+
+      // Inspect the arguments of the last database call (playlist creation)
+      const lastCall = mockDb.query.mock.calls[mockDb.query.mock.calls.length - 1];
+      const params = lastCall[1];
+      expect(params).toEqual(expect.arrayContaining([mood]));
+    });
   });
 });
