@@ -13,7 +13,7 @@ steps:
         gcloud run services remove-iam-policy-binding "${_SERVICE_NAME}" \
           --region="${_REGION}" \
           --member="allUsers" \
-          --role="roles/run.invoker" >/dev/null 2>&1 || true
+          --role="roles/run.invoker" >/dev/null 2>&1
 
         gcloud run services add-iam-policy-binding "${_SERVICE_NAME}" \
           --region="${_REGION}" \
