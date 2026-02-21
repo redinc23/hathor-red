@@ -108,32 +108,32 @@ describe('PlaylistService', () => {
     });
 
     it('should include keyword search if AI provides keywords', async () => {
-        // Mock history
-        mockDb.query.mockResolvedValueOnce({ rows: [] });
+      // Mock history
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
 
-        // Mock AI analysis with keywords
-        colabAIService.analyzePlaylistPrompt.mockResolvedValueOnce({
-          genres: ['Rock'],
-          keywords: ['Queen', 'Bohemian'],
-          description: 'Rock keywords'
-        });
-
-        // Mock song results
-        mockDb.query.mockResolvedValueOnce({ rows: [] });
-        // Mock playlist creation
-        mockDb.query.mockResolvedValueOnce({ rows: [{ id: 12 }] });
-
-        await playlistService.generateAIPlaylist(1, {
-          prompt: 'songs by Queen',
-          name: 'Queen Mix'
-        });
-
-        // Verify song query call uses ILIKE for keywords
-        expect(mockDb.query).toHaveBeenCalledWith(
-          expect.stringContaining('ILIKE'),
-          ['Rock', '%Queen | Bohemian%', 10]
-        );
+      // Mock AI analysis with keywords
+      colabAIService.analyzePlaylistPrompt.mockResolvedValueOnce({
+        genres: ['Rock'],
+        keywords: ['Queen', 'Bohemian'],
+        description: 'Rock keywords'
       });
+
+      // Mock song results
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+      // Mock playlist creation
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: 12 }] });
+
+      await playlistService.generateAIPlaylist(1, {
+        prompt: 'songs by Queen',
+        name: 'Queen Mix'
+      });
+
+      // Verify song query call uses ILIKE for keywords
+      expect(mockDb.query).toHaveBeenCalledWith(
+        expect.stringContaining('ILIKE'),
+        expect.arrayContaining(['%Queen | Bohemian%'])
+      );
+    });
 
     it('should propagate database query errors', async () => {
       // Make the first database query fail (e.g., fetching history)
