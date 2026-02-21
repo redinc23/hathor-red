@@ -220,7 +220,6 @@ const ImmersivePlayer = () => {
       pause();
     } else {
       playSong({ id: track.id, title: track.title, artist: track.artist });
-      resume();
     }
   }, [localPlaying, pause, resume, playSong, track]);
 
