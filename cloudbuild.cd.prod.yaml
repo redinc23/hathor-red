@@ -40,7 +40,8 @@ steps:
           --port=5000 \
           --memory=1Gi \
           --cpu=2 \
-          --set-env-vars=NODE_ENV=production
+          --set-env-vars=NODE_ENV=production \
+          --http-health-check-path=/healthz
 
 images:
   - '${_REGION}-docker.pkg.dev/${PROJECT_ID}/hathor-red/hathor-red:${SHORT_SHA}'
