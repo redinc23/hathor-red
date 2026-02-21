@@ -71,7 +71,7 @@ const generateAIPlaylist = async (userId, { prompt, name, songCount = 10 }) => {
 
   // Add keyword search if available (from aiController)
   if (analysis.keywords && analysis.keywords.length > 0) {
-    const keywordSearch = analysis.keywords.slice(0, 3).join(' | ');
+    const keywordSearch = analysis.keywords.slice(0, 3).join(' ');
     query += ` AND (title ILIKE $${paramIndex} OR artist ILIKE $${paramIndex} OR album ILIKE $${paramIndex})`;
     params.push(`%${keywordSearch}%`);
     paramIndex++;
