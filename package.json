@@ -20,7 +20,7 @@
     "test": "jest",
     "test:all": "turbo run test",
     "lint": "eslint .",
-    "lint:ci": "turbo run lint -- --max-warnings=10",
+    "lint:ci": "turbo run lint -- --max-warnings=0",
     "type-check": "tsc --noEmit",
     "type-check:ci": "turbo run type-check",
     "validate": "npm run type-check:ci && npm run lint:ci && npm run test:all",
