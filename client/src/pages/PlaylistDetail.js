@@ -104,10 +104,16 @@ const PlaylistDetail = () => {
   const handleShare = useCallback(() => {
     const url = window.location.href;
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(url).then(() => {
-        console.log('Playlist URL copied to clipboard');
-        alert('Playlist link copied to clipboard!');
-      });
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          console.log('Playlist URL copied to clipboard');
+          alert('Playlist link copied to clipboard!');
+        })
+        .catch((error) => {
+          console.error('Failed to copy playlist URL to clipboard:', error);
+          console.log('Share URL:', url);
+          alert('Share link: ' + url);
+        });
     } else {
       console.log('Share URL:', url);
       alert('Share link: ' + url);
