@@ -110,7 +110,16 @@ class DataCollectionService {
 
     try {
       const pattern = `listening:${userId}:*`;
-      const keys = await this.redis.keys(pattern);
+      const keys = [];
+
+      // Use SCAN via scanIterator to avoid blocking Redis with KEYS
+      for await (const key of this.redis.scanIterator({ MATCH: pattern })) {
+        keys.push(key);
+        // Optional safety cap to avoid scanning an unbounded number of keys
+        if (keys.length >= limit * 2) {
+          break;
+        }
+      }
       
       // Get the most recent entries
       const recentKeys = keys.sort().reverse().slice(0, limit);
