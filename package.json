@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server/index.js",
     "dev:legacy": "concurrently \"pnpm run server\" \"pnpm run client\"",
-    "dev": "concurrently \"pnpm run server\" \"turbo run dev\"",
+    "dev": "turbo run dev || pnpm run dev:legacy",
     "server": "nodemon server/index.js",
     "client": "pnpm --filter hathor-music-client start",
     "build": "turbo run build",
