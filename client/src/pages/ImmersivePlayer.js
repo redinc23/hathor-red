@@ -100,7 +100,11 @@ const WaveformVisualizer = ({ isPlaying, progress }) => {
 
         ctx.fillStyle = gradient;
         ctx.beginPath();
-        ctx.roundRect(x + 1, canvas.height - barH, barWidth - 2, barH, 2);
+        if (typeof ctx.roundRect === 'function') {
+          ctx.roundRect(x + 1, canvas.height - barH, barWidth - 2, barH, 2);
+        } else {
+          ctx.rect(x + 1, canvas.height - barH, barWidth - 2, barH);
+        }
         ctx.fill();
       });
 
