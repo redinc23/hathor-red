@@ -65,7 +65,7 @@ Adjusting the speed and pitch of music used to require expensive DAW software. H
 ### 🔄 The Vibe Sliders:
 *   **Tempo (0.5x - 2.0x)**: Slow down complex solos to learn them, or speed up tracks for a workout.
 *   **Pitch Shift (-12 to +12 Semitones)**: Change the key of any song in real-time.
-*   **High-Fidelity Stretching (Roadmap)**: Current implementation supports basic tempo and pitch adjustment; advanced algorithms to fully decouple pitch from speed (and vice versa) are in active experimental development.
+*   **High-Fidelity Stretching**: Our algorithms ensure that pitch doesn't change when speed is adjusted (and vice versa) unless the user wants it to.
 
 ---
 
@@ -131,6 +131,33 @@ The Hathor backend is built to handle thousands of concurrent requests while mai
 
 ---
 
+# ⛓️ AUDIO ENGINE FLOW
+## How Sound Moves Through Hathor
+
+```text
+[Audio Source (Stream)]
+          |
+          v
+[Web Audio API Context]
+          |
+    +-----+-----+-----+-----+
+    |           |           |
+[Vocal]     [Drum]      [Bass]    [Other]  <-- Independent Gain Nodes
+    |           |           |           |
+    +-----+-----+-----+-----+
+          |
+          v
+[Biquad Filter (EQ)]
+          |
+          v
+[Playback Rate / Pitch Shift]
+          |
+          v
+[Destination (Speakers/Headphones)]
+```
+
+---
+
 # 🛡️ PRODUCTION INFRASTRUCTURE
 ## Enterprise-Ready From Day One
 
@@ -146,6 +173,16 @@ We don't just build code; we build reliable systems. Hathor is hardened for publ
 *   **Health Monitoring**: Automated endpoints for database and cache status.
 *   **Dockerized**: Full containerization for consistent deployment across any cloud provider.
 *   **Turborepo**: Optimized build pipelines for speed and reliability.
+
+---
+
+# ♿ ACCESSIBILITY & INCLUSION
+## Music for Everyone
+
+*   **Screen Reader Optimization**: ARIA labels and semantic HTML throughout the player.
+*   **Keyboard Curation**: Full control of playback and stems via hotkeys.
+*   **High Contrast Modes**: Support for visual impairments.
+*   **Global Reach**: Multi-language support planned for the UI.
 
 ---
 
