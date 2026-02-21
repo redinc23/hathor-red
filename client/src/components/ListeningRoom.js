@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { io } from 'socket.io-client';
 import { musicService } from '../services/music';
@@ -18,6 +18,37 @@ const ListeningRoom = () => {
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [position, setPosition] = useState(0);
+
+  const loadCurrentSong = useCallback(async (songId) => {
+    try {
+      const data = await musicService.getSongById(songId);
+      setCurrentSong(data.song);
+    } catch (error) {
+      console.error('Failed to load song:', error);
+    }
+  }, []);
+
+  const loadRoom = useCallback(async () => {
+    try {
+      const data = await musicService.getRoomById(id);
+      setRoom(data.room);
+      setParticipants(data.participants);
+      if (data.room.current_song_id) {
+        loadCurrentSong(data.room.current_song_id);
+      }
+    } catch (error) {
+      console.error('Failed to load room:', error);
+      alert('Room not found');
+      navigate('/rooms');
+    }
+  }, [id, navigate, loadCurrentSong]);
+
+  const addMessage = useCallback((text, type = 'chat', username = null) => {
+    setMessages((prev) => [
+      ...prev,
+      { text, type, username, timestamp: Date.now() },
+    ]);
+  }, []);
 
   useEffect(() => {
     loadRoom();
@@ -81,38 +112,7 @@ const ListeningRoom = () => {
         newSocket.disconnect();
       }
     };
-  }, [id]);
-
-  const loadRoom = async () => {
-    try {
-      const data = await musicService.getRoomById(id);
-      setRoom(data.room);
-      setParticipants(data.participants);
-      if (data.room.current_song_id) {
-        loadCurrentSong(data.room.current_song_id);
-      }
-    } catch (error) {
-      console.error('Failed to load room:', error);
-      alert('Room not found');
-      navigate('/rooms');
-    }
-  };
-
-  const loadCurrentSong = async (songId) => {
-    try {
-      const data = await musicService.getSongById(songId);
-      setCurrentSong(data.song);
-    } catch (error) {
-      console.error('Failed to load song:', error);
-    }
-  };
-
-  const addMessage = (text, type = 'chat', username = null) => {
-    setMessages((prev) => [
-      ...prev,
-      { text, type, username, timestamp: Date.now() },
-    ]);
-  };
+  }, [id, loadRoom, loadCurrentSong, addMessage]);
 
   const sendMessage = (e) => {
     e.preventDefault();
