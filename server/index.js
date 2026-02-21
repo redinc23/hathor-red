@@ -82,9 +82,6 @@ app.use(express.urlencoded({ extended: true }));
 // Request logging
 app.use(requestLogger);
 
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/songs', songRoutes);

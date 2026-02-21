@@ -19,7 +19,8 @@ export const musicService = {
   },
 
   streamSong: (id) => {
-    return `${api.defaults.baseURL}/songs/${id}/stream`;
+    const token = localStorage.getItem('token');
+    return `${api.defaults.baseURL}/songs/${id}/stream${token ? `?token=${token}` : ''}`;
   },
 
   recordListening: async (songId, duration) => {

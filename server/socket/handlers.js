@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
+const { redisClient } = require('../config/redis');
 
 const setupSocketHandlers = (io) => {
   // Socket.io authentication middleware
@@ -173,6 +174,14 @@ const setupSocketHandlers = (io) => {
 
         // Broadcast to user's other devices only (via user-specific room)
         socket.to(`user-${socket.userId}`).emit('sync-state', state);
+
+        // Update Redis cache for persistence across HTTP requests
+        const cacheKey = `playback:${socket.userId}`;
+        try {
+          await redisClient.setEx(cacheKey, 3600, JSON.stringify(state));
+        } catch (redisErr) {
+          console.error('Redis setEx error in socket sync-state:', redisErr.message);
+        }
       } catch (error) {
         console.error('Sync state error:', error);
       }
