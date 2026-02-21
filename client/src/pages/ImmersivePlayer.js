@@ -180,6 +180,13 @@ const ImmersivePlayer = () => {
   const [showLyrics, setShowLyrics] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
 
+  // Reset local UI state when the active track changes
+  useEffect(() => {
+    setLocalPlaying(false);
+    setCurrentTime(0);
+    setShowLyrics(false);
+    setTilt({ x: 0, y: 0 });
+  }, [track.id]);
   const timerRef = useRef(null);
   const containerRef = useRef(null);
 
