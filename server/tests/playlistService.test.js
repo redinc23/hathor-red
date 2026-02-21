@@ -131,7 +131,7 @@ describe('PlaylistService', () => {
         // Verify song query call uses ILIKE for keywords
         expect(mockDb.query).toHaveBeenCalledWith(
           expect.stringContaining('ILIKE'),
-          expect.arrayContaining(['%Queen | Bohemian%'])
+          ['Rock', '%Queen | Bohemian%', 10]
         );
       });
   });
