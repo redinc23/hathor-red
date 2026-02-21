@@ -239,11 +239,11 @@ class RealTimeAnalytics {
     if (!this.redis) return;
 
     try {
-      // Clean up old trending data
-      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-      await this.redis.zRemRangeByScore('analytics:trending:24h', 0, oneDayAgo);
-      
-      // Could add more periodic cleanup tasks here
+      // Periodic analytics maintenance can be added here.
+      // NOTE: Do not perform score-based cleanup on analytics:trending:24h,
+      // since its scores represent play counts, not timestamps. Time-based
+      // trending cleanup should be implemented using a structure that tracks
+      // timestamps explicitly.
       console.log('Analytics updated successfully');
     } catch (error) {
       console.error('Error updating analytics:', error);
