@@ -81,9 +81,9 @@ function App() {
               />
               <Route path="/playlists" element={<PrivateRoute><Home /></PrivateRoute>} />
               {/* New React Pages */}
-              <Route path="/discover" element={<DiscoverFeed />} />
-              <Route path="/player/:id" element={<ImmersivePlayer />} />
-              <Route path="/playlist/:id" element={<PlaylistDetail />} />
+              <Route path="/discover" element={<PrivateRoute><DiscoverFeed /></PrivateRoute>} />
+              <Route path="/player/:id" element={<PrivateRoute><ImmersivePlayer /></PrivateRoute>} />
+              <Route path="/playlist/:id" element={<PrivateRoute><PlaylistDetail /></PrivateRoute>} />
             </Routes>
           </div>
         </PlayerProvider>
