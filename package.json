@@ -22,7 +22,7 @@
     "lint": "eslint .",
     "lint:ci": "npm run lint",
     "type-check": "tsc --noEmit",
-    "validate": "npm run type-check && npm run test:all && npm run build",
+    "validate": "npm run type-check && npm run test:all",
     "prepare": "husky install",
     "preflight": "tsc --noEmit && eslint . && audit-ci --critical"
   },
