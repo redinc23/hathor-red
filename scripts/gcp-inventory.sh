@@ -20,7 +20,7 @@ require_cmd() {
 require_cmd gcloud
 require_cmd jq
 
-gcloud config set project "${PROJECT_ID}" >/dev/null
+export CLOUDSDK_CORE_PROJECT="${PROJECT_ID}"
 
 timestamp() { date -u +"%Y-%m-%dT%H:%M:%SZ"; }
 hr() { printf "\n%s\n" "================================================================"; }
