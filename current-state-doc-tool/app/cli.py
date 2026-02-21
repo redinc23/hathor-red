@@ -44,7 +44,11 @@ def cmd_create_admin(_: argparse.Namespace) -> None:
             db.refresh(user)
 
         admin_role = _get_role(db, "admin")
-        link = db.exec(select(UserRole).where(UserRole.user_id == user.id, UserRole.role_id == admin_role.id)).first()
+        link = db.exec(
+            select(UserRole)
+            .where(UserRole.user_id == user.id)
+            .where(UserRole.role_id == admin_role.id)
+        ).first()
         if link is None:
             db.add(UserRole(user_id=user.id, role_id=admin_role.id))
             db.commit()
