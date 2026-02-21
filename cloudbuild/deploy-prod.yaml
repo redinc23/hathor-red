@@ -3,7 +3,7 @@ substitutions:
   _REGION: "us-central1"
   _SERVICE_PUBLIC: "hathor-red-public-prod"
   _SERVICE_ADMIN: "hathor-red-admin-prod"
-  _ADMIN_INVOKER: "user:renee@mangu-publishers.com"
+  _ADMIN_INVOKER: ""
 steps:
   - name: "gcr.io/cloud-builders/gcloud"
     entrypoint: "bash"
