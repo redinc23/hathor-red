@@ -1,5 +1,5 @@
 steps:
-  - name: 'node:18-bullseye'
+  - name: 'node:18-alpine'
     id: install-and-validate
     entrypoint: bash
     args:
