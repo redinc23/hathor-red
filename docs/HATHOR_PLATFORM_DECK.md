@@ -65,7 +65,7 @@ Adjusting the speed and pitch of music used to require expensive DAW software. H
 ### 🔄 The Vibe Sliders:
 *   **Tempo (0.5x - 2.0x)**: Slow down complex solos to learn them, or speed up tracks for a workout.
 *   **Pitch Shift (-12 to +12 Semitones)**: Change the key of any song in real-time.
-*   **High-Fidelity Stretching**: Our algorithms ensure that pitch doesn't change when speed is adjusted (and vice versa) unless the user wants it to.
+*   **High-Fidelity Stretching (Roadmap)**: Current implementation supports basic tempo and pitch adjustment; advanced algorithms to fully decouple pitch from speed (and vice versa) are in active experimental development.
 
 ---
 
