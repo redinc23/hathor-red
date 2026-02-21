@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Home from './pages/Home';
 import Rooms from './pages/Rooms';
+import Podcast from './pages/Podcast';
 import ListeningRoom from './components/ListeningRoom';
 import './App.css';
 
@@ -77,6 +78,14 @@ function App() {
                 }
               />
               <Route path="/playlists" element={<PrivateRoute><Home /></PrivateRoute>} />
+              <Route
+                path="/podcast"
+                element={
+                  <PrivateRoute>
+                    <Podcast />
+                  </PrivateRoute>
+                }
+              />
             </Routes>
           </div>
         </PlayerProvider>
