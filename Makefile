@@ -1,7 +1,15 @@
 .PHONY: inventory crack-log
 
 inventory:
-	PROJECT_ID=encoded-shape-487615-b1 REGION=us-central1 ./scripts/gcp-inventory.sh
+	@if [ -z "$$PROJECT_ID" ] || [ -z "$$REGION" ]; then \
+	  echo "Error: PROJECT_ID and REGION must be set (e.g., 'make inventory PROJECT_ID=your-project REGION=your-region')"; \
+	  exit 1; \
+	fi
+	./scripts/gcp-inventory.sh
 
 crack-log:
-	PROJECT_ID=encoded-shape-487615-b1 REGION=us-central1 ./scripts/write-crack-log.sh
+	@if [ -z "$$PROJECT_ID" ] || [ -z "$$REGION" ]; then \
+	  echo "Error: PROJECT_ID and REGION must be set (e.g., 'make crack-log PROJECT_ID=your-project REGION=your-region')"; \
+	  exit 1; \
+	fi
+	./scripts/write-crack-log.sh
