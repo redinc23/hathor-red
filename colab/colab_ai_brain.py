@@ -133,6 +133,26 @@ class ColabAIBrain:
             emotions["energetic"] = 0.6
         elif energy < 0.4 and valence > 0.5:
             emotions["calm"] = 0.8
+
+        # Fallback mapping for mid-range/neutral cases where no rule matched
+        if not any(emotions.values()):
+            # Use 0.5 as a neutral midpoint for both energy and valence
+            if energy >= 0.5 and valence >= 0.5:
+                # Moderately positive and somewhat energetic
+                emotions["happy"] = 0.6
+                emotions["energetic"] = 0.4
+            elif energy < 0.5 and valence < 0.5:
+                # Moderately low energy and valence: mild sadness/calm
+                emotions["sad"] = 0.6
+                emotions["calm"] = 0.4
+            elif energy >= 0.5 and valence < 0.5:
+                # Higher energy but lower valence: mild anger/drive
+                emotions["angry"] = 0.5
+                emotions["energetic"] = 0.4
+            elif energy < 0.5 and valence >= 0.5:
+                # Lower energy but higher valence: calm/pleasant
+                emotions["calm"] = 0.6
+                emotions["happy"] = 0.4
         
         return {
             "emotions": emotions,
