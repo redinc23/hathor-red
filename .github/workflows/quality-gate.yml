@@ -29,4 +29,4 @@ jobs:
         run: pnpm run validate
       
       - name: Build check
-        run: pnpm run build:ci
+        run: pnpm run build
