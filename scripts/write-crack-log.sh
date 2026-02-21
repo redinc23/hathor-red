@@ -28,7 +28,9 @@ mkdir -p "$(dirname "${OUT}")"
   echo
   echo "## Inventory Output (GROUND TRUTH)"
   echo '```text'
-  PROJECT_ID="${PROJECT_ID}" REGION="${REGION}" ./scripts/gcp-inventory.sh
+  if ! PROJECT_ID="${PROJECT_ID}" REGION="${REGION}" ./scripts/gcp-inventory.sh; then
+    echo "[ERROR] Failed to run ./scripts/gcp-inventory.sh. Ensure gcloud is installed and configured, then rerun this script."
+  fi
   echo '```'
   echo
   echo "## Truth Questions (YES/NO + evidence)"
