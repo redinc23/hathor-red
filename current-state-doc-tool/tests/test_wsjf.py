@@ -8,4 +8,4 @@ def test_wsjf_basic() -> None:
 
 def test_wsjf_zero_job_size_safe() -> None:
     b = BacklogItem(title="x", cost_of_delay=10, job_size=0, business_value=0)
-    assert b.wsjf == 0.0
+    assert abs(b.wsjf - 0.0) < 1e-9
