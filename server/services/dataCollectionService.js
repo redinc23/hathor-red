@@ -124,13 +124,10 @@ class DataCollectionService {
       // Get the most recent entries
       const recentKeys = keys.sort().reverse().slice(0, limit);
       
-      const history = [];
-      for (const key of recentKeys) {
-        const data = await this.redis.get(key);
-        if (data) {
-          history.push(JSON.parse(data));
-        }
-      }
+      const values = await this.redis.mGet(recentKeys);
+      const history = values
+        .filter(data => data !== null)
+        .map(data => JSON.parse(data));
       
       return history;
     } catch (error) {
