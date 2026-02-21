@@ -103,7 +103,7 @@ describe('PlaylistService', () => {
       // Verify song query call uses fallback genres for 'chill'
       expect(mockDb.query).toHaveBeenCalledWith(
         expect.stringContaining('genre IN ($1,$2,$3)'),
-        expect.arrayContaining(['Jazz', 'Classical', 'Electronic'])
+        ['Jazz', 'Classical', 'Electronic', 10]
       );
     });
 
