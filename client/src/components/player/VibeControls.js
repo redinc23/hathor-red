@@ -24,7 +24,7 @@ const VibeControls = ({ playbackSpeed, pitchShift, changePlaybackSpeed, changePi
           min="-12"
           max="12"
           value={pitchShift}
-          onChange={(e) => changePitchShift(parseInt(e.target.value))}
+          onChange={(e) => changePitchShift(parseInt(e.target.value, 10))}
           className="control-slider"
         />
       </div>
