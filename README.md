@@ -178,6 +178,7 @@ hathor-red/
 - **[Production Readiness](PRODUCTION_READY.md)** - Gaps and fixes for production deployment
 - **[Quick Start](QUICKSTART.md)** - Get started in minutes
 - **[Features](FEATURES.md)** - Detailed feature documentation
+- **[Mastery Roadmap](MASTERY_ROADMAP.md)** - Phased plan for achieving full codebase ownership
 
 ## 🧭 MVP Readiness (East Asia Niche-Market Music Platform)
 
