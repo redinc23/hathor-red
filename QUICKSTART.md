@@ -220,3 +220,10 @@ psql -U postgres -d hathor_music -f database/schema.sql
 ---
 
 **Ready to start!** Run `npm run dev` and visit http://localhost:3000
+
+## Secure Streaming Notes (New)
+
+- Playback now uses **signed short-lived stream URLs** issued by `GET /api/songs/:id/stream-url`.
+- The audio element then loads `/api/songs/:id/stream?t=<token>` directly, enabling native seek/range behavior.
+- Direct `/uploads/*` access is intentionally disabled in the app server path; stream media through authenticated APIs only.
+- Optional stream token TTL can be configured with `STREAM_TOKEN_EXPIRE` (default: `60s`).

@@ -452,3 +452,23 @@ socket.on('user-joined', handleUserJoin)
 ---
 
 **Built with passion for music and technology!** 🎵
+
+---
+
+### 8. Hardened Authenticated Media Streaming
+**Description:** Playback now uses short-lived signed stream URLs plus proper HTTP byte-range semantics for reliable native audio playback.
+
+**Features:**
+- Short-lived stream tokens for `<audio src>` clients
+- Stream endpoint supports either query token (`?t=`) or `Authorization: Bearer <jwt>`
+- RFC-compatible `Range` support with `206 Partial Content`
+- Safe file-path resolution to prevent path traversal
+- Authenticated-only streaming (no public `/uploads` bypass)
+- Stream-aware rate limiting to avoid seek/retry throttling
+
+**Technical Implementation:**
+- Token utility: `server/utils/streamToken.js`
+- Stream auth middleware: `server/middleware/streamAuth.js`
+- Range streaming controller: `server/controllers/songController.js`
+- Frontend stream URL acquisition: `client/src/services/music.js`
+
