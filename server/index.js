@@ -26,6 +26,8 @@ const aiRoutes = require('./routes/ai');
 const colabAIService = require('./services/colabAIService');
 
 const app = express();
+
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: corsOptions
@@ -49,14 +51,35 @@ app.use(helmet({
 app.use(compression());
 
 // Rate limiting
-const limiter = rateLimit({
+const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests, please try again later.' }
 });
-app.use('/api/', limiter);
+
+const streamLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 2000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many streaming requests, please try again later.' }
+});
+
+app.use('/api/songs', (req, res, next) => {
+  if (/^\/\d+\/stream(?:$|\/)/.test(req.path) || /^\/\d+\/stream-url$/.test(req.path)) {
+    return streamLimiter(req, res, next);
+  }
+  return apiLimiter(req, res, next);
+});
+
+app.use('/api/', (req, res, next) => {
+  if (req.path.startsWith('/songs/')) {
+    return next();
+  }
+  return apiLimiter(req, res, next);
+});
 
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
@@ -75,9 +98,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Request logging
 app.use(requestLogger);
-
-// Static files
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);

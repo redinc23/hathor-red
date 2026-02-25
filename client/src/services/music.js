@@ -18,8 +18,9 @@ export const musicService = {
     return response.data;
   },
 
-  streamSong: (id) => {
-    return `${api.defaults.baseURL}/songs/${id}/stream`;
+  getStreamUrl: async (id) => {
+    const response = await api.get(`/songs/${id}/stream-url`);
+    return response.data.url;
   },
 
   recordListening: async (songId, duration) => {

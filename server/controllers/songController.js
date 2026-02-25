@@ -1,5 +1,23 @@
-const db = require('../config/database');
+const fs = require('fs');
+const fsp = require('fs/promises');
 const path = require('path');
+const mime = require('mime-types');
+const db = require('../config/database');
+const { signStreamToken } = require('../utils/streamToken');
+
+const UPLOAD_DIR = path.resolve(__dirname, '..', '..', 'uploads');
+
+function resolveUploadPath(dbFilePath) {
+  const stripped = String(dbFilePath || '').replace(/^\/?uploads\//, '');
+  const normalized = path.normalize(stripped);
+  const resolved = path.resolve(UPLOAD_DIR, normalized);
+
+  if (!resolved.startsWith(UPLOAD_DIR + path.sep)) {
+    throw new Error('Invalid file path');
+  }
+
+  return resolved;
+}
 
 const getSongs = async (req, res) => {
   try {
@@ -64,7 +82,7 @@ const uploadSong = async (req, res) => {
 
     const result = await db.query(
       'INSERT INTO songs (title, artist, album, duration, file_path, genre, year, uploaded_by) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
-      [title, artist, album || null, parseInt(duration), filePath, genre || null, year ? parseInt(year) : null, req.user.userId]
+      [title, artist, album || null, parseInt(duration, 10), filePath, genre || null, year ? parseInt(year, 10) : null, req.user.userId]
     );
 
     res.status(201).json({
@@ -77,9 +95,36 @@ const uploadSong = async (req, res) => {
   }
 };
 
+const getStreamUrl = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const songCheck = await db.query('SELECT id FROM songs WHERE id = $1', [id]);
+    if (songCheck.rows.length === 0) {
+      return res.status(404).json({ error: 'Song not found' });
+    }
+
+    const token = signStreamToken({
+      userId: req.user.userId,
+      songId: Number(id)
+    });
+
+    return res.json({
+      url: `/api/songs/${id}/stream?t=${encodeURIComponent(token)}`
+    });
+  } catch (error) {
+    console.error('Get stream URL error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
 const streamSong = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.streamToken?.songId != null && Number(req.streamToken.songId) !== Number(id)) {
+      return res.status(401).json({ error: 'Invalid stream token for song' });
+    }
 
     const result = await db.query('SELECT file_path FROM songs WHERE id = $1', [id]);
 
@@ -87,11 +132,89 @@ const streamSong = async (req, res) => {
       return res.status(404).json({ error: 'Song not found' });
     }
 
-    const filePath = path.join(__dirname, '..', '..', result.rows[0].file_path);
-    res.sendFile(filePath);
+    const filePath = resolveUploadPath(result.rows[0].file_path);
+
+    let stat;
+    try {
+      stat = await fsp.stat(filePath);
+    } catch (error) {
+      return res.status(404).json({ error: 'Audio file missing' });
+    }
+
+    const fileSize = stat.size;
+    const range = req.headers.range;
+    const contentType = mime.lookup(filePath) || 'application/octet-stream';
+
+    res.setHeader('Accept-Ranges', 'bytes');
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'private, max-age=0, must-revalidate');
+    res.setHeader('Last-Modified', stat.mtime.toUTCString());
+    res.setHeader('ETag', `"${fileSize}-${Math.round(stat.mtimeMs)}"`);
+
+    if (range) {
+      const match = String(range).match(/^bytes=(\d*)-(\d*)$/);
+
+      if (!match) {
+        return res.status(416).setHeader('Content-Range', `bytes */${fileSize}`).end();
+      }
+
+      let start = match[1] === '' ? null : parseInt(match[1], 10);
+      let end = match[2] === '' ? null : parseInt(match[2], 10);
+
+      if (start === null && end !== null) {
+        const suffix = end;
+        if (Number.isNaN(suffix) || suffix <= 0) {
+          return res.status(416).setHeader('Content-Range', `bytes */${fileSize}`).end();
+        }
+        start = Math.max(fileSize - suffix, 0);
+        end = fileSize - 1;
+      } else {
+        if (start === null) start = 0;
+        if (end === null) end = fileSize - 1;
+      }
+
+      if (Number.isNaN(start) || Number.isNaN(end) || start < 0 || end < start || start >= fileSize) {
+        return res.status(416).setHeader('Content-Range', `bytes */${fileSize}`).end();
+      }
+
+      end = Math.min(end, fileSize - 1);
+      const chunkSize = (end - start) + 1;
+
+      res.status(206);
+      res.setHeader('Content-Range', `bytes ${start}-${end}/${fileSize}`);
+      res.setHeader('Content-Length', chunkSize);
+
+      const stream = fs.createReadStream(filePath, { start, end });
+      stream.on('error', () => {
+        if (!res.headersSent) {
+          res.status(500).end();
+        } else {
+          res.destroy();
+        }
+      });
+
+      return stream.pipe(res);
+    }
+
+    res.status(200);
+    res.setHeader('Content-Length', fileSize);
+
+    const stream = fs.createReadStream(filePath);
+    stream.on('error', () => {
+      if (!res.headersSent) {
+        res.status(500).end();
+      } else {
+        res.destroy();
+      }
+    });
+
+    return stream.pipe(res);
   } catch (error) {
     console.error('Stream song error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+    return undefined;
   }
 };
 
@@ -115,6 +238,7 @@ module.exports = {
   getSongs,
   getSongById,
   uploadSong,
+  getStreamUrl,
   streamSong,
   recordListening
 };

@@ -559,3 +559,35 @@ pm2 logs hathor-music --lines 100
 8. **Environment variables** - Never commit `.env` file
 9. **Backup regularly** - Automate database backups
 10. **Monitor logs** - Set up log monitoring and alerts
+
+## Streaming Security & Proxy Requirements
+
+### Environment Variables
+Add this optional variable to tune signed stream URL expiry:
+
+```env
+STREAM_TOKEN_EXPIRE=60s
+```
+
+### Reverse Proxy (Nginx)
+For best playback/seek behavior, configure a dedicated stream location that preserves range headers and disables buffering:
+
+```nginx
+location ~* ^/api/songs/[0-9]+/stream$ {
+    proxy_pass http://app;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_set_header Range $http_range;
+    proxy_set_header If-Range $http_if_range;
+
+    proxy_buffering off;
+    proxy_cache off;
+}
+```
+
+> Do not expose `/uploads` directly when using authenticated streaming.

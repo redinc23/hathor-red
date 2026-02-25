@@ -48,7 +48,7 @@ export const PlayerProvider = ({ children }) => {
 
     try {
       setCurrentSong(song);
-      const streamUrl = musicService.streamSong(song.id);
+      const streamUrl = await musicService.getStreamUrl(song.id);
 
       if (audioRef.current) {
         audioRef.current.src = streamUrl;

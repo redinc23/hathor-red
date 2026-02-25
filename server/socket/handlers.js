@@ -1,6 +1,16 @@
 const jwt = require('jsonwebtoken');
 const db = require('../config/database');
 
+function sanitizeChatMessage(message) {
+  return String(message || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .trim();
+}
+
 const setupSocketHandlers = (io) => {
   // Socket.io authentication middleware
   io.use((socket, next) => {
@@ -136,10 +146,16 @@ const setupSocketHandlers = (io) => {
     // Chat in room
     socket.on('room-chat', (data) => {
       const { roomId, message } = data;
+      const sanitizedMessage = sanitizeChatMessage(message).slice(0, 1000);
+
+      if (!sanitizedMessage) {
+        return;
+      }
+
       io.to(`room-${roomId}`).emit('chat-message', {
         userId: socket.userId,
         username: socket.username,
-        message,
+        message: sanitizedMessage,
         timestamp: Date.now()
       });
     });
