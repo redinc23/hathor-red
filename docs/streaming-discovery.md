@@ -362,8 +362,8 @@ add_header X-XSS-Protection      "1; mode=block" always;
 ```
 
 **Critical observations:**
-- **`Authorization` header is NOT forwarded for `/uploads`** — consistent with files being publicly accessible without auth
-- **`Range` header is NOT forwarded in any location block** — browser seek requests reach Express without the Range header, compounding the byte-range problem in §5
+- **Request headers (`Authorization`, `Range`, etc.) are forwarded by default** — the shown Nginx config does not unset or override these headers, so they are sent to the upstream `/uploads` handler; public access is a consequence of upstream auth logic, not Nginx stripping `Authorization`.
+- **Browser `Range` (seek) requests should reach Express unchanged** — any missing or ignored range behavior must originate in the Node/Express stack (e.g., route handlers or middleware). If you want to be explicit at the Nginx layer, you can add directives such as `proxy_set_header Range $http_range;` in the relevant `location` block.
 - No `proxy_buffering off` for the stream path — Nginx buffers the full file before sending, increasing TTFB for large audio files
 
 ---
