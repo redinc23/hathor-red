@@ -191,8 +191,8 @@ const streamSong = async (req, res) => {
 **File path construction:**
 - `__dirname` = `server/controllers`
 - `path.join(__dirname, '..', '..')` = project root
-- `file_path` stored as `/uploads/<uuid>.<ext>`
-- Full resolved path: `<project-root>/uploads/<uuid>.<ext>`
+- `file_path` stored as `/uploads/<uuid>.<ext>` (note the leading `/`, making this an absolute path)
+- Because `file_path` is absolute, `path.join(__dirname, '..', '..', result.rows[0].file_path)` resolves to `/uploads/<uuid>.<ext>` (filesystem root), **not** `<project-root>/uploads/<uuid>.<ext>` — this is a functional bug in the current implementation.
 
 **What `res.sendFile` does and does NOT do:**
 - Sets `Content-Type` from file extension — correct for `.mp3`, `.wav`, etc.
