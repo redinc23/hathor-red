@@ -163,7 +163,7 @@ body('isPublic').optional().isBoolean()
 body('maxListeners').optional().isInt({ min: 2, max: 100 })
 ```
 
-**Observation:** The stream route (`GET /songs/:id/stream`) has `authMiddleware` but **no `idParamValidation → validate`** chain. The raw `id` param goes straight to the DB query. The `pg` driver will cast it, but non-integer values produce a silent empty result (404) rather than a proper 400 validation error.
+**Observation:** The stream route (`GET /songs/:id/stream`) has `authMiddleware` but **no `idParamValidation → validate`** chain. The raw `id` param goes straight to the DB query (`SELECT file_path FROM songs WHERE id = $1`). For `songs.id SERIAL` (integer), passing a non-numeric `:id` causes Postgres to raise an `invalid input syntax for type integer` error, which is caught by the controller and returned as a 500, not a 404. Adding `idParamValidation` (for example, `param('id').isInt({ min: 1 })` combined with `validate`) would reject invalid IDs up front with a 400 and prevent this DB error/500 path.
 
 ---
 
