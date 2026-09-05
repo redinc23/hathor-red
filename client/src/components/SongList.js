@@ -95,12 +95,14 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
             placeholder="Search songs…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search songs"
           />
           {genres.length > 0 && (
             <select
               className="song-genre-filter"
               value={selectedGenre}
               onChange={(e) => setSelectedGenre(e.target.value)}
+              aria-label="Filter by genre"
             >
               <option value="">All genres</option>
               {genres.map((g) => (
@@ -110,7 +112,7 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
           )}
         </div>
       )}
-      <div className="song-list">
+      <div className="song-list" role="list">
         {filtered.length === 0 ? (
           <div className="song-list-empty">No songs match</div>
         ) : (
@@ -118,8 +120,22 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
             <div
               key={song.id}
               className={`song-row ${currentSong?.id === song.id ? 'playing' : ''}`}
+              role="listitem"
             >
-              <div className="song-info" onClick={() => handlePlay(index)} style={{ cursor: 'pointer' }}>
+              <div
+                className="song-info"
+                onClick={() => handlePlay(index)}
+                style={{ cursor: 'pointer' }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handlePlay(index);
+                  }
+                }}
+                aria-label={`Play ${song.title} by ${song.artist || 'Unknown'}`}
+              >
                 <div className="song-title">
                   {currentSong?.id === song.id && isPlaying ? '▶ ' : ''}
                   {song.title}
@@ -131,32 +147,58 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
                 <span className="song-duration">{formatDuration(song.duration)}</span>
               </div>
               <div className="song-actions">
-                <button className="song-action-btn" onClick={() => handlePlay(index)} title="Play">
-                  <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18"><path d="M8 5v14l11-7z" /></svg>
+                <button
+                  type="button"
+                  className="song-action-btn"
+                  onClick={() => handlePlay(index)}
+                  title="Play"
+                  aria-label={`Play ${song.title}`}
+                >
+                  <svg fill="currentColor" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
                 </button>
-                <button className="song-action-btn" onClick={() => handleAddToQueue(song)} title="Add to queue">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18">
+                <button
+                  type="button"
+                  className="song-action-btn"
+                  onClick={() => handleAddToQueue(song)}
+                  title="Add to queue"
+                  aria-label={`Add ${song.title} to queue`}
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z" />
                   </svg>
                 </button>
-                <button className="song-action-btn" onClick={() => handlePlayNext(song)} title="Play next">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18">
+                <button
+                  type="button"
+                  className="song-action-btn"
+                  onClick={() => handlePlayNext(song)}
+                  title="Play next"
+                  aria-label={`Play ${song.title} next`}
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 010 1.972l-11.54 6.347a1.125 1.125 0 01-1.667-.986V5.653z" />
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 5.25v13.5" />
                   </svg>
                 </button>
-                <button className="song-action-btn" onClick={() => handleAddToPlaylist(song.id)} title="Add to playlist">
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
+                <button
+                  type="button"
+                  className="song-action-btn"
+                  onClick={() => handleAddToPlaylist(song.id)}
+                  title="Add to playlist"
+                  aria-label={`Add ${song.title} to playlist`}
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
                 </button>
                 {onRemoveSong && (
                   <button
+                    type="button"
                     className="song-action-btn"
                     onClick={() => handleRemove(song)}
                     disabled={removingId === song.id}
                     title="Remove from playlist"
+                    aria-label={`Remove ${song.title} from playlist`}
                     style={{ color: removingId === song.id ? '#999' : '#c62828' }}
                   >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} width="18" height="18" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
@@ -164,10 +206,10 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
               </div>
 
               {addingToPlaylist === song.id && (
-                <div className="playlist-popup">
+                <div className="playlist-popup" role="dialog" aria-label="Add to playlist">
                   <div className="playlist-popup-header">
                     <span>Add to playlist</span>
-                    <button type="button" onClick={() => setAddingToPlaylist(null)}>x</button>
+                    <button type="button" onClick={() => setAddingToPlaylist(null)} aria-label="Close playlist picker">x</button>
                   </div>
                   {(playlists.length === 0) && (
                     <div className="playlist-popup-item" style={{ opacity: 0.7 }}>No playlists yet</div>
@@ -183,6 +225,7 @@ const SongList = ({ songs, title, showSearch = false, onRefresh, onRemoveSong })
               {addFeedback?.songId === song.id && (
                 <div
                   className="playlist-add-feedback"
+                  role="status"
                   style={{
                     fontSize: '0.75rem',
                     marginTop: 4,

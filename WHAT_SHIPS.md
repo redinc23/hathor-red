@@ -14,6 +14,7 @@ Snapshot of what the **main** branch actually does. Update every agent run.
 - **Player control a11y polish (dose-1.106)**: aria-valuetext on seek bar and volume; playback-speed range labelled with keyboard arrows/Home/End and aria-valuetext
 - **Transport + queue chrome a11y (dose-1.107)**: aria-label / aria-pressed on shuffle, previous, play/pause, next, repeat; aria-expanded + aria-controls on queue toggle; aria-label on speed, clear queue, close queue; decorative SVGs aria-hidden; playback controls role=group
 - **Queue row Play next (dose-1.108)**: non-current queue rows expose a control that moves the track to immediately after the current index (uses existing `moveInQueue`; skips current row)
+- **Song row action a11y (dose-1.109)**: Play / Add to queue / Play next / Add to playlist / Remove buttons carry per-track aria-label; search + genre filter labelled; song title area keyboard-activatable; feedback uses role=status; playlist picker dialog labelled
 - Playlists, rooms, AI with fallbacks, Olympus flags honesty
 - Docs honesty, auth soft logout, room host controls, live listener counts, Olympus fallback banners
 - Home genre filter calls `GET /songs?genre=` and server filters by `genre = $1`
@@ -36,4 +37,4 @@ PlayerContext on main was truncated to stubs after prior agent pushes. Restored 
 
 ## Next item
 
-Dose 1.108 queue Play next closed. Remaining Dose 1 polish if any; then Dose 2/4 leftovers. No Dose 6+.
+Dose 1.109 song-row a11y closed. Dose 1 polish largely complete; next Dose 2/4 leftovers (profile polish, room edge cases). No Dose 6+.
