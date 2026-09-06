@@ -129,8 +129,6 @@ export const PlayerProvider = ({ children }) => {
     return () => clearInterval(progressInterval.current);
   }, [isPlaying, audio]);
 
-  // See repo history f800869 for full body; this run restores via multi-commit if needed.
-  // Minimal viable restore: loadSong, play/pause, queue, clearQueue with Media Session clear.
   const loadSong = useCallback(async (song, { autoplay = true, startAt = 0 } = {}) => {
     if (!song || song.id == null) return;
     const gen = ++playGeneration.current;
@@ -218,6 +216,7 @@ export const PlayerProvider = ({ children }) => {
     setQueueIndex(0);
     setShuffleOrder([]);
     setShufflePos(0);
+    setIsShuffled(false);
     playGeneration.current += 1;
     streamRetryGen.current = -1;
     try {
@@ -232,7 +231,14 @@ export const PlayerProvider = ({ children }) => {
     if (!song) return;
     setQueue((prev) => {
       if (prev.some((s) => s && s.id === song.id)) return prev;
-      return [...prev, song];
+      const next = [...prev, song];
+      if (isShuffledRef.current) {
+        setShuffleOrder((order) => {
+          if (!order.length) return order;
+          return [...order, prev.length];
+        });
+      }
+      return next;
     });
   }, []);
 
@@ -246,15 +252,69 @@ export const PlayerProvider = ({ children }) => {
     if (list[startIndex]) await loadSong(list[startIndex], { autoplay: true });
   }, [loadSong]);
 
+  /** Advance to next track respecting shuffle order and repeat modes. */
   const playNext = useCallback(async () => {
     const q = queueRef.current;
     if (!q.length) return;
+
+    if (repeatModeRef.current === 'one' && currentSongRef.current) {
+      safeSetCurrentTime(audio, 0);
+      setProgress(0);
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (_) {
+        setIsPlaying(false);
+      }
+      return;
+    }
+
+    if (isShuffledRef.current && shuffleOrderRef.current.length === q.length) {
+      let nextPos = shufflePosRef.current + 1;
+      if (nextPos >= shuffleOrderRef.current.length) {
+        if (repeatModeRef.current === 'all') {
+          const order = fisherYatesShuffle(q.length);
+          const cur = queueIndexRef.current;
+          const pos = order.indexOf(cur);
+          if (pos > 0) {
+            order.splice(pos, 1);
+            order.unshift(cur);
+          }
+          setShuffleOrder(order);
+          setShufflePos(0);
+          nextPos = 1;
+          if (order.length <= 1) {
+            safeSetCurrentTime(audio, 0);
+            setProgress(0);
+            try {
+              await audio.play();
+              setIsPlaying(true);
+            } catch (_) {
+              setIsPlaying(false);
+            }
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+      const idx = shuffleOrderRef.current[nextPos] ?? shuffleOrderRef.current[0];
+      if (idx == null || !q[idx]) return;
+      setShufflePos(nextPos);
+      setQueueIndex(idx);
+      await loadSong(q[idx], { autoplay: true });
+      return;
+    }
+
     const next = queueIndexRef.current + 1;
     if (next < q.length) {
       setQueueIndex(next);
       await loadSong(q[next], { autoplay: true });
+    } else if (repeatModeRef.current === 'all' && q.length) {
+      setQueueIndex(0);
+      await loadSong(q[0], { autoplay: true });
     }
-  }, [loadSong]);
+  }, [audio, loadSong]);
 
   const playPrevious = useCallback(async () => {
     const q = queueRef.current;
@@ -264,12 +324,60 @@ export const PlayerProvider = ({ children }) => {
       setProgress(0);
       return;
     }
+
+    if (isShuffledRef.current && shuffleOrderRef.current.length === q.length) {
+      const prevPos = shufflePosRef.current - 1;
+      if (prevPos >= 0) {
+        const idx = shuffleOrderRef.current[prevPos];
+        if (idx == null || !q[idx]) return;
+        setShufflePos(prevPos);
+        setQueueIndex(idx);
+        await loadSong(q[idx], { autoplay: true });
+      }
+      return;
+    }
+
     const prev = queueIndexRef.current - 1;
     if (prev >= 0) {
       setQueueIndex(prev);
       await loadSong(q[prev], { autoplay: true });
+    } else if (repeatModeRef.current === 'all' && q.length) {
+      const last = q.length - 1;
+      setQueueIndex(last);
+      await loadSong(q[last], { autoplay: true });
     }
   }, [audio, loadSong]);
+
+  // Advance on natural track end
+  useEffect(() => {
+    const onEnded = () => {
+      playNext();
+    };
+    audio.addEventListener('ended', onEnded);
+    return () => audio.removeEventListener('ended', onEnded);
+  }, [audio, playNext]);
+
+  const toggleShuffle = useCallback(() => {
+    setIsShuffled((prev) => {
+      const next = !prev;
+      const q = queueRef.current;
+      if (next && q.length > 0) {
+        const order = fisherYatesShuffle(q.length);
+        const cur = queueIndexRef.current;
+        const pos = order.indexOf(cur);
+        if (pos > 0) {
+          order.splice(pos, 1);
+          order.unshift(cur);
+        }
+        setShuffleOrder(order);
+        setShufflePos(0);
+      } else {
+        setShuffleOrder([]);
+        setShufflePos(0);
+      }
+      return next;
+    });
+  }, []);
 
   const setVolume = useCallback((v) => {
     const n = Number(v);
@@ -308,7 +416,7 @@ export const PlayerProvider = ({ children }) => {
     play, pause, togglePlay, seek, playNext, playPrevious, loadSong,
     clearQueue, addToQueue, setQueueAndPlay,
     setVolume, setPlaybackSpeed, toggleMute,
-    toggleShuffle: () => setIsShuffled((p) => !p),
+    toggleShuffle,
     cycleRepeat: () => setRepeatMode((prev) => (prev === 'none' ? 'all' : prev === 'all' ? 'one' : 'none')),
     formatTime,
     removeFromQueue: () => {},
@@ -316,7 +424,14 @@ export const PlayerProvider = ({ children }) => {
     insertNext: (song) => addToQueue(song),
     playAtIndex: async (i) => {
       const q = queueRef.current;
-      if (q[i]) { setQueueIndex(i); await loadSong(q[i], { autoplay: true }); }
+      if (q[i]) {
+        setQueueIndex(i);
+        if (isShuffledRef.current && shuffleOrderRef.current.length) {
+          const pos = shuffleOrderRef.current.indexOf(i);
+          if (pos >= 0) setShufflePos(pos);
+        }
+        await loadSong(q[i], { autoplay: true });
+      }
     },
   };
 
