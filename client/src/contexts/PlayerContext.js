@@ -410,6 +410,104 @@ export const PlayerProvider = ({ children }) => {
     return `${m}:${s.toString().padStart(2, '0')}`;
   }, []);
 
+  // Media Session metadata + playbackState (lock screen / OS media keys)
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.mediaSession) return;
+    try {
+      if (!currentSong) {
+        navigator.mediaSession.metadata = null;
+        navigator.mediaSession.playbackState = 'none';
+        return;
+      }
+      const artwork = [];
+      if (currentSong.cover_url || currentSong.artwork_url || currentSong.coverUrl) {
+        const src = currentSong.cover_url || currentSong.artwork_url || currentSong.coverUrl;
+        artwork.push({ src, sizes: '512x512', type: 'image/jpeg' });
+      }
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentSong.title || 'Unknown',
+        artist: currentSong.artist || currentSong.uploader || 'Hathor',
+        album: currentSong.album || '',
+        artwork,
+      });
+    } catch (_) {}
+  }, [currentSong]);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.mediaSession) return;
+    try {
+      if (!currentSong) {
+        navigator.mediaSession.playbackState = 'none';
+      } else {
+        navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
+      }
+    } catch (_) {}
+  }, [isPlaying, currentSong]);
+
+  // Media Session action handlers
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.mediaSession) return undefined;
+
+    const handlers = {
+      play: () => { play(); },
+      pause: () => { pause(); },
+      previoustrack: () => { playPrevious(); },
+      nexttrack: () => { playNext(); },
+      seekbackward: (details) => {
+        const offset = (details && Number.isFinite(details.seekOffset) ? details.seekOffset : MEDIA_SESSION_SEEK_SEC);
+        const t = (Number.isFinite(audio.currentTime) ? audio.currentTime : 0) - offset;
+        seek(Math.max(0, t));
+      },
+      seekforward: (details) => {
+        const offset = (details && Number.isFinite(details.seekOffset) ? details.seekOffset : MEDIA_SESSION_SEEK_SEC);
+        const t = (Number.isFinite(audio.currentTime) ? audio.currentTime : 0) + offset;
+        seek(t);
+      },
+      seekto: (details) => {
+        if (details && Number.isFinite(details.seekTime)) seek(details.seekTime);
+      },
+    };
+
+    try {
+      Object.entries(handlers).forEach(([action, handler]) => {
+        try {
+          navigator.mediaSession.setActionHandler(action, handler);
+        } catch (_) {
+          // Some actions unsupported in older browsers
+        }
+      });
+    } catch (_) {}
+
+    return () => {
+      try {
+        Object.keys(handlers).forEach((action) => {
+          try {
+            navigator.mediaSession.setActionHandler(action, null);
+          } catch (_) {}
+        });
+      } catch (_) {}
+    };
+  }, [play, pause, playNext, playPrevious, seek, audio]);
+
+  // Keyboard: N = next, P = previous (ignore when typing in inputs)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
+      const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || (e.target && e.target.isContentEditable)) return;
+      const key = e.key;
+      if (key === 'n' || key === 'N') {
+        e.preventDefault();
+        playNext();
+      } else if (key === 'p' || key === 'P') {
+        e.preventDefault();
+        playPrevious();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [playNext, playPrevious]);
+
   const value = {
     currentSong, isPlaying, volume, playbackSpeed, progress, duration, queue, queueIndex,
     isShuffled, repeatMode, audioSrc, loudnessGain: 1, waveform: null,
