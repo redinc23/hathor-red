@@ -7,7 +7,7 @@ Snapshot of what the **main** branch actually does. Update every agent run.
 - Password register/login, JWT, profile GET/PUT
 - Change password from Settings
 - Song list, upload, signed progressive stream for `<audio>` (server + musicService intact)
-- **Full PlayerContext restored (dose-1.112)**: loadSong race guard, queue, Fisher–Yates shuffle, hydrate/persist, media session, keyboard N/P, clearQueue (incl. Media Session null metadata + playbackState none), seek clamps
+- **Full PlayerContext restored (dose-1.113)**: loadSong race guard, queue, Fisher–Yates shuffle, hydrate/persist, media session, keyboard N/P, clearQueue (incl. Media Session null metadata + playbackState none), seek clamps, toggleMute, insertNext
 - MusicPlayer a11y through dose-1.110
 - Playlists, rooms, AI fallbacks, Olympus flags honesty
 - Docs honesty, soft logout, room host/presence, genre filter, Settings status
